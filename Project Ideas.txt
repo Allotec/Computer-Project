@@ -1,0 +1,3 @@
+Opens to terminal with commands
+    Code editor for new programs or from EEPROM
+    
