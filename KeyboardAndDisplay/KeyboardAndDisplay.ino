@@ -13,22 +13,25 @@ const int ROWSARRAY = 50;
 void printArray(int row1, int row2, char array[][COLUMNS]);
 bool menuOptionsCheck(char c);
 char menuOption();
-void editNewProgram();
-void excuteProgram();
+void editProgram();
+void excuteProgram(bool clearArray);
 
 void parseOperands(char array[]);
 bool equals(char ParsedInstruction[3], char instruction);
+int charToNum(char charNum[2]);
+void showOutput(int registers[]);
+void printOuput(int registers[], int row1, int row2);
 
 const char menu[][20] = {
   "(N) Edit New Program", 
   "(E) Execute Program ", 
-  "(L) Load Program    ", 
-  "(R) Rough           ",
-  "(W) Word            "
+  "(Z) Edit Existing   ", 
+  "(S) Save            ",
+  "(L) Load            "
   };
 
 const char menuOptions[] = {
-  'N', 'E', 'L', 'R', 'W'
+  'N', 'E', 'Z', 'S', 'L'
   };
 
 int line = 0;
@@ -72,11 +75,13 @@ void loop() {
 
   botLine = 0;
   topLine = ROWS;
+  line = 0;
+  dispLine = 0;
 
   switch(c){
     case 'N':
     case 'n':
-      editNewProgram();
+      editProgram(true);
       
       break;
 
@@ -84,6 +89,11 @@ void loop() {
     case 'e':
       executeProgram();
 
+      break;
+
+    case 'Z':
+    case 'z':
+      editProgram(false);
       break;
     default:
       lcd.clear();
@@ -153,13 +163,20 @@ bool menuOptionsCheck(char c){
   return(false);
 }
 
-void editNewProgram(){
+void editProgram(bool clearArray){
   lcd.clear();
+  lcd.setCursor(0, 0);
 
-  for(int i = 0; i < ROWSARRAY; i++){
-    for(int j = 0; j < COLUMNS; j++){
-      charArray[i][j] = ' ';
+  if(clearArray){
+    for(int i = 0; i < ROWSARRAY; i++){
+      for(int j = 0; j < COLUMNS; j++){
+        charArray[i][j] = ' ';
+      }
     }
+  }
+  else{
+    printArray(botLine, topLine, charArray);
+    lcd.setCursor(charLine[line], dispLine);
   }
 
   while(1){
@@ -244,24 +261,143 @@ Comparison
 10 sli rd, r1, r2
 
 Special
-12 stop
+11 stop
 */
 
 void executeProgram(){
   int registers[20];
   int currentLine = 0;
 
+  for(int i = 0; i < 20; i++){
+    registers[i] = 0;
+  }
+
   while(1){
     parseOperands(charArray[currentLine]);
 
+    Serial.print("Operation- ");
+    Serial.print(operands[0]);
+    Serial.print("\n");
+    
     switch(operands[0]){
-      
+      //add
+      case 0:
+        registers[operands[1]] = registers[operands[2]] + registers[operands[3]];
+        break;  
+      //sub
+      case 1:
+        registers[operands[1]] = registers[operands[2]] - registers[operands[3]];
+        break;
+      //adi
+      case 2:
+        registers[operands[1]] = registers[operands[2]] + operands[3];
+        break;
+      //mul
+      case 3:
+        registers[operands[1]] = registers[operands[2]] * registers[operands[3]];
+        break;
+      //div
+      case 4:
+        registers[operands[1]] = registers[operands[2]] / registers[operands[3]];
+        break;
+      //beq
+      case 5:
+        if(registers[operands[1]] == registers[operands[2]]){
+          currentLine = operands[3] - 1;
+        }
+        break;
+      //bne
+      case 6:
+        if(registers[operands[1]] != registers[operands[2]]){
+          currentLine = operands[3] - 1;
+        }
+
+        Serial.print(registers[operands[1]] + " " + registers[operands[2]]);
+        Serial.print("\n");
+
+        break;
+      //bgt
+      case 7:
+        if(registers[operands[1]] > registers[operands[2]]){
+          currentLine = operands[3] - 1;
+        }
+        break;
+      //blt
+      case 8:
+        if(registers[operands[1]] < registers[operands[2]]){
+          currentLine = operands[3] - 1;
+        }
+        break;
+      //slt
+      case 9:
+        if(registers[operands[2]] < registers[operands[3]]){
+          registers[operands[1]] = 1;
+        }
+        else{
+          registers[operands[1]] = 0;
+        }
+        break;
+      //sli
+      case 10:
+        if(registers[operands[2]] <= registers[operands[3]]){
+          registers[operands[1]] = 1;
+        }
+        else{
+          registers[operands[1]] = 0;
+        }
+        break;
+      //stop
+      case 11:
+        //Show output
+        showOutput(registers);
+        return;
 
       //Uknown command
       default:
         break;
     }
 
+    currentLine++;
+  }
+}
+
+void showOutput(int registers[20]){
+  int row1 = 0, row2 = 3;
+  char c;
+
+  lcd.cursor_off();
+  printOuput(registers, row1, row2);
+
+  while(1){
+    if(keyboard.available()){
+      c = keyboard.read();
+
+      if(c == PS2_DOWNARROW && row2 < 19){
+        printOuput(registers, ++row1, ++row2);
+        c = '0';
+      }
+      else if(c == PS2_UPARROW && row1 > 0){
+        printOuput(registers, --row1, --row2);
+        c = '0';
+      }
+      else if(c == '|'){
+        return;
+      }
+    }
+  }
+
+}
+
+void printOuput(int registers[], int row1, int row2){
+  int dispRow = 0;
+  lcd.clear();
+
+  for(int i = row1; i <= row2; i++){
+    lcd.setCursor(0, dispRow++);
+    lcd.print("R[");
+    lcd.print(i);
+    lcd.print("] = ");
+    lcd.print(registers[i]);
   }
 }
 
@@ -277,12 +413,57 @@ void parseOperands(char array[]){
     for(int j = 0; j < 2; j++){
       charOperands[i][j] = array[(4 * (1 + i)) + j];
     }
+    operands[i + 1] = charToNum(charOperands[i]);
   }
 
   if(equals(instruction, "add")){
     operands[0] = 0;
   }
+  else if(equals(instruction, "sub")){
+    operands[0] = 1;
+  }
+  else if(equals(instruction, "adi")){
+    operands[0] = 2;
+  }
+  else if(equals(instruction, "mul")){
+    operands[0] = 3;
+  }
+  else if(equals(instruction, "div")){
+    operands[0] = 4;
+  }
+  else if(equals(instruction, "beq")){
+    operands[0] = 5;
+  }
+  else if(equals(instruction, "bne")){
+    operands[0] = 6;
+  }
+  else if(equals(instruction, "bgt")){
+    operands[0] = 7;
+  }
+  else if(equals(instruction, "blt")){
+    operands[0] = 8;
+  }
+  else if(equals(instruction, "slt")){
+    operands[0] = 9;
+  }
+  else if(equals(instruction, "sli")){
+    operands[0] = 10;
+  }
+  else if(equals(instruction, "stop")){
+    operands[0] = 11;
+  }
+  else{
+    operands[0] = 11;
+  }
+}
 
+int charToNum(char charNum[2]){
+  if(charNum[0] == '0'){
+    return(charNum[1] - '0');
+  }
+  else{
+    return((10 * (charNum[0] - '0')) + (charNum[1] - '0'));
+  }
 }
 
 bool equals(char ParsedInstruction[3], char instruction[3]){
