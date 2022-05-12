@@ -1,3 +1,5 @@
 Opens to terminal with commands
     Code editor for new programs or from EEPROM
     
+Use an EEPROM and turn it into a serial interface with 
+an arduino nano to save programs
