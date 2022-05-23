@@ -1,5 +1,21 @@
-Opens to terminal with commands
+Ideas
+Arduino Computer Project
+    Opens to terminal with commands
     Code editor for new programs or from EEPROM
-    
-Use an EEPROM and turn it into a serial interface with 
-an arduino nano to save programs
+        
+    Use 4 EEPROM's and turn it into a serial interface 
+    It will take in assembly and turn it into the MIPS machine code if a txt file then store as ASCII
+    With that make a file manager with file names and you can read and load
+    to implement MIPS instruction set (32 bit)
+    Use the SRAM to store the values in the char array so it only has to be 4 rows and can fetch from SRAM when you scroll
+
+    Make a C to MIPS compiler
+    Make a circuit emulator with debugging tools like MARS in circuit
+
+    Actual USES/Motivation
+        Making it a standalone computer
+
+
+Courses
+    Algorithms
+    Analysis and Design of Digital Integrated Circuits
