@@ -2,9 +2,9 @@
 //Class to execute program on the EEPROM
 class Processor{
 private:
-    int registers[32];
-    unsigned int programCounter = 0;
-    unsigned int instructionRegister = 0;
+    // uint32_t registers[32];
+    // uint32_t programCounter = 0;
+    // uint32_t instructionRegister = 0;
     
 
 public:

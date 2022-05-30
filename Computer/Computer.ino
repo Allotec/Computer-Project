@@ -2,7 +2,8 @@
 #include <PS2Keyboard.h>
 #include <Wire.h>
 #include "LCDDisplayAndKeyboard.h"
-#include "Processor.h"
+//#include "Processor.h"
+#include "Memory.h"
 
 char charArray[ROWSARRAY][COLUMNS];
 int charLine[ROWSARRAY];
@@ -10,12 +11,21 @@ int charLine[ROWSARRAY];
 LiquidCrystal_I2C lcd(0x27, COLUMNS, ROWS);
 PS2Keyboard keyboard;
 //Processor CPU;
+Memory Mem(4);
 
 void setup() {
+  Serial.begin(9600);
+
   for(int i = 0; i < ROWSARRAY; i++){
     for(int j = 0; j < COLUMNS; j++){
       charArray[i][j] = ' ';
     }
+  }
+
+  Mem.init();
+  for(int i = 0; i < 5; i++){
+    Mem.setMemAddr(i);
+    Mem.test();
   }
 
   delay(500);
@@ -28,8 +38,6 @@ void setup() {
 
   //Keyboard Setup
   keyboard.begin(DataPin, IRQpin);
-  
-  Serial.begin(9600);
 }
 
 void loop() {
@@ -52,6 +60,7 @@ void loop() {
     case 'z':
       editProgram(false);
       break;
+      
     default:
       lcd.clear();
       lcd.setCursor(0, 0);

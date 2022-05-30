@@ -4,7 +4,7 @@
 #include "LCDDisplayAndKeyboard.h"
 
 extern LiquidCrystal_I2C lcd;
-extern PS2Keyboard keyboard;\
+extern PS2Keyboard keyboard;
 extern char charArray[ROWSARRAY][COLUMNS];
 extern int charLine[ROWSARRAY];
 
