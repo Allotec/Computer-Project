@@ -20,12 +20,13 @@ uint8_t programLength(char array[][20]){
 }
 
 //Array is always size 20
+//Have to add a pass through the array to find the labels and put them in a table with their values then look them up when needed
 uint32_t* assemble(char arr[][20], uint8_t length){
     //Opcode -> 0
     //Rd -> 1
     //Rs -> 2
     //Rt or imm or shamt -> 3 
-    char splitArray[4][10];
+    char splitArray[4][12];
     int arrayIndex = 0, arrayRow = 0;
     int i = 0;
     char* array;
@@ -45,7 +46,7 @@ uint32_t* assemble(char arr[][20], uint8_t length){
 
                 //Fill the rest of the opcode index with zeros
                 if(i < 7){
-                    for(int j = i; j < 10; j++){
+                    for(int j = i; j < 12; j++){
                         splitArray[arrayRow][j] = 0;
                     }
                 }
@@ -66,7 +67,7 @@ uint32_t* assemble(char arr[][20], uint8_t length){
 }
 
 
-uint32_t mipsInstruction(char opcode[10], char rd[10], char rs[10], char rt[10]){
+uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12]){
     uint32_t instruction = 0;
     uint8_t opcodeIndex = opcodeLookup(opcode);
 
@@ -89,6 +90,7 @@ uint32_t mipsInstruction(char opcode[10], char rd[10], char rs[10], char rt[10])
                 rsV = 0;
                 shamt = arrayToNum(rt);
                 shamt <<= 6;
+                instruction = shamt;
             }
             // jr
             else if(functV == 0x08){
@@ -106,6 +108,8 @@ uint32_t mipsInstruction(char opcode[10], char rd[10], char rs[10], char rt[10])
                 rtV = rsV;
                 rsV = rdV;
                 rdV = 0;
+                opcodeV << 26;
+                instruction = opcodeV;
             }
 
             //General Case
@@ -113,21 +117,50 @@ uint32_t mipsInstruction(char opcode[10], char rd[10], char rs[10], char rt[10])
             rtV <<= 16;
             rsV <<= 21;
 
-            instruction = rdV | rtV | rsV| functV | shamt | opcodeV;
+            instruction = rdV | rtV | rsV| functV;
 
             break;
         
         //I type
         case 1:
+            //Register swaps and immdiate calculation
+            //case opcode rt, rs, imm
+            if(rtV == 0xFF){
+                //For beq and bne
+                if(opcodeV == 0x04 || opcodeV == 0x05){
+                    rtV = rdV;
+                    rdV = (arrayToNum(rt) & 0x00FFFFFF) >> 2;;
+                }
+                else{
+                    rtV = rdV;
+                    rdV = arrayToNum(rt) & 0x0000FFFF;
+                }
+            }
+            //case opcode rt, imm(rs)
+            else if(rsV == 0xFF){
+                rsV = rtV;
+                rtV = rdV;
+                rdV = arrayToNum(rs) & 0x0000FFFF;
+            }
             
+            //Shifting
+            rtV <<= 16;
+            rsV <<= 21;
+            opcodeV <<= 26;
 
-            printf("\nrd- %x\nrt- %x\nrs- %x\nfunct- %x\nshamt- %x\nop- %x\n", rdV, rtV, rsV, functV, shamt, opcodeV);
+            instruction = rdV | rtV | rsV | opcodeV;
+            
 
             break;
 
         //J type
         case 2:
+            //For j and jal
+            rdV = (arrayToNum(rd) & 0x00FFFFFF) >> 2;
+            printf("\n\nrd- %x\nrt- %x\nrs- %x\nfunct- %x\nshamt- %x\nop- %x\n\n", rdV, rtV, rsV, functV, shamt, opcodeV);
+            opcodeV <<= 26;
 
+            instruction = rdV | opcodeV;
 
             break;
 
@@ -152,7 +185,7 @@ uint32_t mipsInstruction(char opcode[10], char rd[10], char rs[10], char rt[10])
 }
 
 //Returns the index into the table for the given opcode
-uint32_t opcodeLookup(char opcode[10]){
+uint32_t opcodeLookup(char opcode[12]){
     for(uint32_t i = 0; i < instructionNum; i++){
         if(strcmp(instructions[i].name, opcode) == 0)
             return(i);
@@ -162,7 +195,7 @@ uint32_t opcodeLookup(char opcode[10]){
 }
 
 //Returns the value of the register given the name
-uint32_t regLookup(char reg[10]){
+uint32_t regLookup(char reg[12]){
     for(int i = 0; i < regNum; i++){
         if(strcmp(registers[i].name, reg) == 0)
             return(registers[i].val);
@@ -172,8 +205,9 @@ uint32_t regLookup(char reg[10]){
 }
 
 //Turns a char array into an integer
-int arrayToNum(char num[10]){
+int arrayToNum(char num[12]){
     int8_t sign = 1;
+    int base = 10;
     int val = 0;
     uint8_t power = 0;
     
@@ -188,12 +222,24 @@ int arrayToNum(char num[10]){
 
         num[i - 1] = 0;
     }
+    else if(num[0] == '0' && num[1] == 'x'){
+        int i = 1;
+        base = 16;
 
-    for(int i = 9; i >= 0; i--){
+        for(int j = 0; j < 2; j++){
+            for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= 9; i++){
+                num[i - 1] = num[i];
+            }
+
+            num[i - 1] = 0;
+        }
+    }
+
+    for(int i = 11; i >= 0; i--){
         if(num[i] == '\0')
             continue;
 
-        val += (num[i] - '0') * mathPow(10, power++);
+        val += (num[i] - '0') * mathPow(base, power++);
     }
 
     return(val * sign);

@@ -20,16 +20,16 @@ const uint8_t instructionNum = 60;
 
 const instruction instructions[] = {
     //name for op fnct   fmt   ft
-    {"add", 0, 0, 0x20, 0, 0}, {"addi", 1, 0, 0x08, 0, 0}, {"addiu", 1, 0, 0x09, 0, 0},
-    {"addu", 1, 0, 0x21, 0, 0}, {"and", 0, 0, 0x24, 0, 0}, {"andi", 1, 0, 0x0C, 0, 0},
-    {"beq", 1, 0, 0x04, 0, 0}, {"bne", 1, 0, 0x05, 0, 0}, {"j", 2, 0, 0x02, 0, 0},
-    {"jal", 2, 0, 0x03, 0, 0}, {"jr", 0, 0, 0x08, 0, 0}, {"lbu", 1, 0, 0x24, 0, 0},
-    {"lhu", 1, 0, 0x25, 0, 0}, {"ll", 1, 0, 0x30, 0, 0}, {"lui", 1, 0, 0x0F, 0, 0},
-    {"lw", 1, 0, 0x23, 0, 0}, {"nor", 0, 0, 0x27, 0, 0}, {"or", 0, 0, 0x25, 0, 0},
-    {"ori", 1, 0, 0x0D, 0, 0}, {"slt", 0, 0, 0x2a, 0, 0}, {"slti", 1, 0, 0x0A, 0, 0},
-    {"sltiu", 1, 0, 0x0B, 0, 0}, {"sltu", 0, 0, 0x2B, 0, 0}, {"sll", 0, 0, 0x00, 0, 0},
-    {"srl", 0, 0, 0x02, 0, 0}, {"sb", 1, 0, 0x28, 0, 0}, {"sc", 1, 0, 0x38, 0, 0},
-    {"sh", 1, 0, 0x29, 0, 0}, {"sw", 1, 0, 0x2b, 0, 0}, {"sub", 0, 0, 0x22, 0, 0},
+    {"add", 0, 0, 0x20, 0, 0}, {"addi", 1, 0x08, 0, 0, 0}, {"addiu", 1, 0x09, 0, 0, 0},
+    {"addu", 0, 0, 0x21, 0, 0}, {"and", 0, 0, 0x24, 0, 0}, {"andi", 1, 0x0C, 0, 0, 0},
+    {"beq", 1, 0x04, 0, 0, 0}, {"bne", 1, 0x05, 0, 0, 0}, {"j", 2, 0x02, 0, 0, 0},
+    {"jal", 2, 0x03, 0, 0, 0}, {"jr", 0, 0, 0x08, 0, 0}, {"lbu", 1, 0x24, 0, 0, 0},
+    {"lhu", 1, 0x25, 0, 0, 0}, {"ll", 1, 0x30, 0, 0, 0}, {"lui", 1, 0x0F, 0, 0, 0},
+    {"lw", 1, 0x23, 0, 0, 0}, {"nor", 0, 0, 0x27, 0, 0}, {"or", 0, 0, 0x25, 0, 0},
+    {"ori", 1, 0x0D, 0, 0, 0}, {"slt", 0, 0, 0x2a, 0, 0}, {"slti", 1, 0x0A, 0, 0, 0},
+    {"sltiu", 1, 0x0B, 0, 0, 0}, {"sltu", 0, 0, 0x2B, 0, 0}, {"sll", 0, 0, 0x00, 0, 0},
+    {"srl", 0, 0, 0x02, 0, 0}, {"sb", 1, 0x28, 0, 0, 0}, {"sc", 1, 0x38, 0, 0, 0},
+    {"sh", 1, 0x29, 0, 0, 0}, {"sw", 1, 0x2b, 0, 0, 0}, {"sub", 0, 0, 0x22, 0, 0},
     {"subu", 0, 0, 0x23, 0, 0}, {"bclt", 4, 0x11, 0, 0x08, 0x01}, {"bclf", 4, 0x11, 0, 0x08, 0},
     {"div", 0, 0, 0x1A, 0, 0}, {"divu", 0, 0, 0x1B, 0, 0}, {"add.s", 3, 0x11, 0, 0x10, 0},
     {"add.d", 3, 0x11, 0, 0x11, 0}, {"c.eq.s", 3, 0x11, 0x32, 0x10, 0}, {"c.lt.s", 3, 0x11, 0x3C, 0x10, 0},
@@ -62,8 +62,8 @@ const regVal registers[] = {
 
 uint32_t* assemble(char array[][20], uint8_t length);
 uint8_t programLength(char arr[][20]);
-uint32_t mipsInstruction(char opcode[10], char rd[10], char rs[10], char rt[10]);
-uint32_t opcodeLookup(char opcode[10]);
-uint32_t regLookup(char reg[10]);
-int arrayToNum(char num[10]);
+uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12]);
+uint32_t opcodeLookup(char opcode[12]);
+uint32_t regLookup(char reg[12]);
+int arrayToNum(char num[12]);
 int mathPow(int x, uint8_t y);
