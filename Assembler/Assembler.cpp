@@ -1,6 +1,42 @@
 #include "Assembler.h"
 
-uint8_t programLength(char array[][20]){
+//Gets rid of the lines with all spaces
+void deleteWhiteSpace(char** array, uint8_t maxSize){
+    uint8_t row = 0;
+    uint8_t empty = 0;
+    uint8_t i;
+
+    while(row < maxSize){
+        for(uint8_t j = 0; j < 20; j++){
+            if(array[row][j] == ' '){
+                empty++;
+            }
+        }
+        
+        //If the row is blank shift everything down and blank out the last thing so there isn't two copies
+        if(empty == 19){
+            for(i = row + 1; i < maxSize; i++){
+                for(uint8_t j = 0; j < 20; j++){
+                    array[i - 1][j] = array[i][j];
+                }
+            }
+
+            for(uint8_t j = 0; j < 20; j++){
+                    array[i][j] = ' ';
+            }
+
+        }
+        else{
+            empty = 0;
+            row++;
+        }
+    }
+
+}
+
+//Finds the first empty line
+uint8_t programLength(char** array){
+    deleteWhiteSpace(array, 9);
     uint8_t empty = 0;
     
     for(int i = 0; true; i++){
@@ -19,9 +55,20 @@ uint8_t programLength(char array[][20]){
     }
 }
 
-//Array is always size 20
+//Array is always size 20   
 //Have to add a pass through the array to find the labels and put them in a table with their values then look them up when needed
-uint32_t* assemble(char arr[][20], uint8_t length){
+uint32_t* assemble(char arr[][20], uint8_t maxSize){
+    //Copy orignal array to not mess up its contents
+    char** arrayT = new char*[maxSize + 1];
+    
+    for(int j = 0; j < maxSize; j++){
+        arrayT[j] = new char[20];
+        for (int k = 0; k < 20; k++){
+            arrayT[j][k] = arr[j][k];
+        }
+    }
+
+    uint8_t length = programLength(arrayT);
     //Opcode -> 0
     //Rd -> 1
     //Rs -> 2
@@ -30,10 +77,18 @@ uint32_t* assemble(char arr[][20], uint8_t length){
     int arrayIndex = 0, arrayRow = 0;
     int i = 0;
     char* array;
-    uint32_t* instructions = new uint32_t[length];
+    uint32_t programCounter = 0x400000;
+    uint32_t* instructions = new uint32_t[length + 1];
 
+    //Look for labels and store them with there values
     for(int k = 0; k < length; k++){
-        array = arr[k];
+        
+    }
+
+
+    //Split up all the instructions
+    for(int k = 0; k < length; k++){
+        array = arrayT[k];
 
         //Tokenize each expression
         while(arrayIndex < 20 && arrayRow < 4){
@@ -62,6 +117,14 @@ uint32_t* assemble(char arr[][20], uint8_t length){
         arrayRow = 0;
         arrayIndex = 0;
     }
+
+    //Delete temp array
+    for(int i = 0; i < maxSize + 1; i++) {
+        delete [] arrayT[i];
+    }
+    delete [] arrayT;
+
+    instructions[length] = 0;
 
     return(instructions);
 }
@@ -157,7 +220,6 @@ uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12])
         case 2:
             //For j and jal
             rdV = (arrayToNum(rd) & 0x00FFFFFF) >> 2;
-            printf("\n\nrd- %x\nrt- %x\nrs- %x\nfunct- %x\nshamt- %x\nop- %x\n\n", rdV, rtV, rsV, functV, shamt, opcodeV);
             opcodeV <<= 26;
 
             instruction = rdV | opcodeV;
@@ -182,6 +244,17 @@ uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12])
     }
 
     return(instruction);
+}
+
+//Finds the position of the first character given in the array, if its not then -1 is returned
+uint8_t labelFind(char* array, char c){
+    for(uint8_t i = 0; *(array + i) != 0; i++){
+        if(*(array + i) == c){
+            return(i);
+        }
+    }
+
+    return(-1);
 }
 
 //Returns the index into the table for the given opcode
@@ -216,7 +289,7 @@ int arrayToNum(char num[12]){
         sign = -1;
         int i = 1;
 
-        for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= 9; i++){
+        for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= 11; i++){
             num[i - 1] = num[i];
         }
 
@@ -227,7 +300,7 @@ int arrayToNum(char num[12]){
         base = 16;
 
         for(int j = 0; j < 2; j++){
-            for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= 9; i++){
+            for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= 11; i++){
                 num[i - 1] = num[i];
             }
 
