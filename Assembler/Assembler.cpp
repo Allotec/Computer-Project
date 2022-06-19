@@ -79,12 +79,50 @@ uint32_t* assemble(char arr[][20], uint8_t maxSize){
     char* array;
     uint32_t programCounter = 0x400000;
     uint32_t* instructions = new uint32_t[length + 1];
+    int location;
+    struct label* head = NULL, *tail = NULL;
 
     //Look for labels and store them with there values
     for(int k = 0; k < length; k++){
-        
+        location = labelFind(arrayT[k], ':');
+
+        if(location != 255){
+            //Store in linked list
+            if(head == NULL){
+                head = new struct label;
+                tail = head;
+                head->location = programCounter;
+                head->name = new char[20];
+                
+                for(uint8_t j = 0; j < location; j++){
+                    head->name[j] = arrayT[k][j];
+                }
+            }
+            else{
+                tail->next = new struct label;
+                tail = tail->next;
+                tail->location = programCounter;
+                tail->name = new char[20];
+                
+                for(uint8_t j = 0; j < location; j++){
+                    tail->name[j] = arrayT[k][j];
+                }
+            }
+
+            //Shift and delete
+            for(i = k + 1; i < length; i++){
+                for(uint8_t j = 0; j < 20; j++){
+                    arrayT[i - 1][j] = arrayT[i][j];
+                }
+            }
+
+            length--;
+
+        }
+        programCounter += 4;
     }
 
+    programCounter = 0x400000;
 
     //Split up all the instructions
     for(int k = 0; k < length; k++){
@@ -112,10 +150,11 @@ uint32_t* assemble(char arr[][20], uint8_t maxSize){
             arrayIndex++;
         }
 
-        instructions[k] = mipsInstruction(splitArray[0], splitArray[1], splitArray[2], splitArray[3]);
+        instructions[k] = mipsInstruction(splitArray[0], splitArray[1], splitArray[2], splitArray[3], head, programCounter);
 
         arrayRow = 0;
         arrayIndex = 0;
+        programCounter += 4;
     }
 
     //Delete temp array
@@ -126,11 +165,35 @@ uint32_t* assemble(char arr[][20], uint8_t maxSize){
 
     instructions[length] = 0;
 
+    //Clear the label linked list
+    while(head != NULL){
+        tail = head->next;
+        delete [] head->name;
+        delete head;
+        head = tail;
+    }
+
     return(instructions);
 }
 
+//Returns the program counter value corresponding to the label
+uint32_t labelFinder(struct label* head, char* array){
+    struct label *ptr = head;
 
-uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12]){
+    while(ptr != NULL){
+        if(strcmp(ptr->name, array) == 0){
+            return(ptr->location);
+        }
+        else{
+            ptr = ptr->next;
+        }
+    }
+
+    return(0);
+}
+
+
+uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12], struct label* head, uint32_t programCounter){
     uint32_t instruction = 0;
     uint8_t opcodeIndex = opcodeLookup(opcode);
 
@@ -141,8 +204,9 @@ uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12])
     uint32_t rtV = regLookup(rt);
     uint32_t rdV = regLookup(rd);
     uint32_t shamt = 0;
+    int32_t tempNum;
 
-
+    //Tests the instruction formaat
     switch (instructions[opcodeIndex].format){
         //R type
         case 0:            
@@ -190,10 +254,12 @@ uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12])
             //case opcode rt, rs, imm
             if(rtV == 0xFF){
                 //For beq and bne
-                if(opcodeV == 0x04 || opcodeV == 0x05){
-                    rtV = rdV;
-                    rdV = (arrayToNum(rt) & 0x00FFFFFF) >> 2;;
+                if(opcodeV == 0x04 || opcodeV == 0x05){//Change to relative addressing instead of absolute
+                    rtV = rsV;
+                    rsV = rdV;
+                    rdV = ((labelFinder(head, rt) - programCounter) / 2) & 0x0000FFFF;
                 }
+                //case opcode rd, rs, imm
                 else{
                     rtV = rdV;
                     rdV = arrayToNum(rt) & 0x0000FFFF;
@@ -212,14 +278,13 @@ uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12])
             opcodeV <<= 26;
 
             instruction = rdV | rtV | rsV | opcodeV;
-            
 
             break;
 
         //J type
-        case 2:
+        case 2://put num in rd
             //For j and jal
-            rdV = (arrayToNum(rd) & 0x00FFFFFF) >> 2;
+            rdV = (labelFinder(head, rd) & 0x03FFFFFF) >> 2;
             opcodeV <<= 26;
 
             instruction = rdV | opcodeV;
@@ -248,13 +313,13 @@ uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12])
 
 //Finds the position of the first character given in the array, if its not then -1 is returned
 uint8_t labelFind(char* array, char c){
-    for(uint8_t i = 0; *(array + i) != 0; i++){
+    for(int i = 0; *(array + i) != 0 && i < 20; i++){
         if(*(array + i) == c){
             return(i);
         }
     }
 
-    return(-1);
+    return(255);
 }
 
 //Returns the index into the table for the given opcode

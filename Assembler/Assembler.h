@@ -68,10 +68,11 @@ const regVal registers[] = {
 
 uint32_t* assemble(char array[][20], uint8_t maxSize);
 uint8_t programLength(char** arr);
-uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12]);
+uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12], struct label* head, uint32_t programCounter);
 uint32_t opcodeLookup(char opcode[12]);
 uint32_t regLookup(char reg[12]);
 int arrayToNum(char num[12]);
 int mathPow(int x, uint8_t y);
 uint8_t labelFind(char* array, char c);
 void deleteWhiteSpace(char** array);
+uint32_t labelFinder(struct label* head, char* array);
