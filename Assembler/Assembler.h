@@ -65,14 +65,22 @@ const regVal registers[] = {
     {"$sp", 29}, {"$fp", 30},{"$ra", 31}
 };
 
+const int lineSize = 20;
+const int tokenSize = 12;
+const int maxTokens = 4;
 
-uint32_t* assemble(char array[][20], uint8_t maxSize);
+
+uint32_t* assemble(char array[][lineSize], uint8_t maxSize);
 uint8_t programLength(char** arr);
-uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12], struct label* head, uint32_t programCounter);
-uint32_t opcodeLookup(char opcode[12]);
-uint32_t regLookup(char reg[12]);
-int arrayToNum(char num[12]);
+uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct label* head, uint32_t programCounter);
+uint32_t opcodeLookup(char* opcode);
+uint32_t regLookup(char* reg);
+int arrayToNum(char* num);
 int mathPow(int x, uint8_t y);
 uint8_t labelFind(char* array, char c);
 void deleteWhiteSpace(char** array);
 uint32_t labelFinder(struct label* head, char* array);
+char** parseLine(char* line);
+struct label* labelList(char** array, uint8_t &length);
+void replacePseudo(char** array);
+

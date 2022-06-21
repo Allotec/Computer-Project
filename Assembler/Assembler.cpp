@@ -7,21 +7,21 @@ void deleteWhiteSpace(char** array, uint8_t maxSize){
     uint8_t i;
 
     while(row < maxSize){
-        for(uint8_t j = 0; j < 20; j++){
+        for(uint8_t j = 0; j < lineSize; j++){
             if(array[row][j] == ' '){
                 empty++;
             }
         }
         
         //If the row is blank shift everything down and blank out the last thing so there isn't two copies
-        if(empty == 19){
+        if(empty == lineSize - 1){
             for(i = row + 1; i < maxSize; i++){
-                for(uint8_t j = 0; j < 20; j++){
+                for(uint8_t j = 0; j < lineSize; j++){
                     array[i - 1][j] = array[i][j];
                 }
             }
 
-            for(uint8_t j = 0; j < 20; j++){
+            for(uint8_t j = 0; j < lineSize; j++){
                     array[i][j] = ' ';
             }
 
@@ -40,13 +40,13 @@ uint8_t programLength(char** array){
     uint8_t empty = 0;
     
     for(int i = 0; true; i++){
-        for(int j = 0; j < 20; j++){
+        for(int j = 0; j < lineSize; j++){
             if(array[i][j] == ' '){
                 empty++;
             }
         }
         
-        if(empty == 19 || i == 50){
+        if(empty == lineSize - 1){// Add a max length if needed
             return(i);
         }
         else{
@@ -54,16 +54,15 @@ uint8_t programLength(char** array){
         }
     }
 }
-
-//Array is always size 20   
+  
 //Have to add a pass through the array to find the labels and put them in a table with their values then look them up when needed
-uint32_t* assemble(char arr[][20], uint8_t maxSize){
+uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
     //Copy orignal array to not mess up its contents
     char** arrayT = new char*[maxSize + 1];
     
     for(int j = 0; j < maxSize; j++){
-        arrayT[j] = new char[20];
-        for (int k = 0; k < 20; k++){
+        arrayT[j] = new char[lineSize];
+        for (int k = 0; k < lineSize; k++){
             arrayT[j][k] = arr[j][k];
         }
     }
@@ -73,87 +72,24 @@ uint32_t* assemble(char arr[][20], uint8_t maxSize){
     //Rd -> 1
     //Rs -> 2
     //Rt or imm or shamt -> 3 
-    char splitArray[4][12];
-    int arrayIndex = 0, arrayRow = 0;
-    int i = 0;
-    char* array;
+    char** splitArray;
+    int i;
     uint32_t programCounter = 0x400000;
     uint32_t* instructions = new uint32_t[length + 1];
-    int location;
-    struct label* head = NULL, *tail = NULL;
-
-    //Look for labels and store them with there values
-    for(int k = 0; k < length; k++){
-        location = labelFind(arrayT[k], ':');
-
-        if(location != 255){
-            //Store in linked list
-            if(head == NULL){
-                head = new struct label;
-                tail = head;
-                head->location = programCounter;
-                head->name = new char[20];
-                
-                for(uint8_t j = 0; j < location; j++){
-                    head->name[j] = arrayT[k][j];
-                }
-            }
-            else{
-                tail->next = new struct label;
-                tail = tail->next;
-                tail->location = programCounter;
-                tail->name = new char[20];
-                
-                for(uint8_t j = 0; j < location; j++){
-                    tail->name[j] = arrayT[k][j];
-                }
-            }
-
-            //Shift and delete
-            for(i = k + 1; i < length; i++){
-                for(uint8_t j = 0; j < 20; j++){
-                    arrayT[i - 1][j] = arrayT[i][j];
-                }
-            }
-
-            length--;
-
-        }
-        programCounter += 4;
-    }
-
-    programCounter = 0x400000;
+    struct label* head = labelList(arrayT, length), *ptr;
 
     //Split up all the instructions
     for(int k = 0; k < length; k++){
-        array = arrayT[k];
-
-        //Tokenize each expression
-        while(arrayIndex < 20 && arrayRow < 4){
-            //If we are at the start of a word
-            if(*(array + arrayIndex) != ' ' && *(array + arrayIndex) != ',' && *(array + arrayIndex) != '('){
-                for(i = 0; *(array + arrayIndex) != ' ' && *(array + arrayIndex) != ',' && *(array + arrayIndex) != ')' && *(array + arrayIndex) != '(' && arrayIndex < 20; i++){
-                    splitArray[arrayRow][i] = *(array + arrayIndex);
-                    arrayIndex++;
-                }
-
-                //Fill the rest of the opcode index with zeros
-                if(i < 7){
-                    for(int j = i; j < 12; j++){
-                        splitArray[arrayRow][j] = 0;
-                    }
-                }
-
-                arrayRow++;
-            }
-
-            arrayIndex++;
-        }
+        splitArray = parseLine(arrayT[k]);
 
         instructions[k] = mipsInstruction(splitArray[0], splitArray[1], splitArray[2], splitArray[3], head, programCounter);
 
-        arrayRow = 0;
-        arrayIndex = 0;
+        //Delete temp array
+        for(int i = 0; i < maxTokens; i++) {
+            delete [] splitArray[i];
+        }
+        delete [] splitArray;
+
         programCounter += 4;
     }
 
@@ -167,13 +103,105 @@ uint32_t* assemble(char arr[][20], uint8_t maxSize){
 
     //Clear the label linked list
     while(head != NULL){
-        tail = head->next;
+        ptr = head->next;
         delete [] head->name;
         delete head;
-        head = tail;
+        head = ptr;
     }
 
     return(instructions);
+}
+
+//Replacing pseudo instruction with MIPS instructions
+void replacePseudo(char** array){
+    
+
+}
+
+//Return a linked list of labels and values and removes thme from the array
+struct label* labelList(char** array, uint8_t &length){
+    int location;
+    struct label* head = NULL, *tail = NULL;
+    uint32_t programCounter = 0x400000;
+    int i;
+
+    //Look for labels and store them with there values
+    for(int k = 0; k < length; k++){
+        location = labelFind(array[k], ':');
+
+        if(location != 255){
+            //Store in linked list
+            if(head == NULL){
+                head = new struct label;
+                tail = head;
+                head->location = programCounter;
+                head->name = new char[lineSize];
+                
+                for(uint8_t j = 0; j < location; j++){
+                    head->name[j] = array[k][j];
+                }
+            }
+            else{
+                tail->next = new struct label;
+                tail = tail->next;
+                tail->location = programCounter;
+                tail->name = new char[lineSize];
+                
+                for(uint8_t j = 0; j < location; j++){
+                    tail->name[j] = array[k][j];
+                }
+            }
+
+            //Shift and delete
+            for(i = k + 1; i < length; i++){
+                for(uint8_t j = 0; j < lineSize; j++){
+                    array[i - 1][j] = array[i][j];
+                }
+            }
+
+            length--;
+
+        }
+        programCounter += 4;
+    }
+
+    return(head);
+}
+
+
+//Passes back a parsed line of assembly
+char** parseLine(char* line){
+    char** splitArray = new char*[maxTokens];
+    int arrayIndex = 0, arrayRow = 0;
+    int i;
+
+    for(int j = 0; j < maxTokens; j++){
+        splitArray[j] = new char[tokenSize];
+    }
+
+    //Tokenize each expression
+    while(arrayIndex < lineSize && arrayRow < maxTokens){
+        //If we are at the start of a word
+        if(*(line+ arrayIndex) != ' ' && *(line+ arrayIndex) != ',' && *(line+ arrayIndex) != '('){
+            for(i = 0; *(line+ arrayIndex) != ' ' && *(line+ arrayIndex) != ',' && *(line+ arrayIndex) != ')' && *(line+ arrayIndex) != '(' && arrayIndex < lineSize; i++){
+                splitArray[arrayRow][i] = *(line+ arrayIndex);
+                arrayIndex++;
+            }
+
+            //Fill the rest of the opcode index with zeros
+            if(i < 7){
+                for(int j = i; j < tokenSize; j++){
+                    splitArray[arrayRow][j] = 0;
+                }
+            }
+
+            arrayRow++;
+        }
+
+        arrayIndex++;
+    }
+
+    return(splitArray);    
 }
 
 //Returns the program counter value corresponding to the label
@@ -193,7 +221,7 @@ uint32_t labelFinder(struct label* head, char* array){
 }
 
 
-uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12], struct label* head, uint32_t programCounter){
+uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct label* head, uint32_t programCounter){
     uint32_t instruction = 0;
     uint8_t opcodeIndex = opcodeLookup(opcode);
 
@@ -305,6 +333,8 @@ uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12],
 
         //Error
         default:
+            //For nop
+            return(0);
             break;
     }
 
@@ -313,7 +343,7 @@ uint32_t mipsInstruction(char opcode[12], char rd[12], char rs[12], char rt[12],
 
 //Finds the position of the first character given in the array, if its not then -1 is returned
 uint8_t labelFind(char* array, char c){
-    for(int i = 0; *(array + i) != 0 && i < 20; i++){
+    for(int i = 0; *(array + i) != 0 && i < lineSize; i++){
         if(*(array + i) == c){
             return(i);
         }
@@ -323,7 +353,7 @@ uint8_t labelFind(char* array, char c){
 }
 
 //Returns the index into the table for the given opcode
-uint32_t opcodeLookup(char opcode[12]){
+uint32_t opcodeLookup(char* opcode){
     for(uint32_t i = 0; i < instructionNum; i++){
         if(strcmp(instructions[i].name, opcode) == 0)
             return(i);
@@ -333,7 +363,7 @@ uint32_t opcodeLookup(char opcode[12]){
 }
 
 //Returns the value of the register given the name
-uint32_t regLookup(char reg[12]){
+uint32_t regLookup(char* reg){
     for(int i = 0; i < regNum; i++){
         if(strcmp(registers[i].name, reg) == 0)
             return(registers[i].val);
@@ -343,7 +373,7 @@ uint32_t regLookup(char reg[12]){
 }
 
 //Turns a char array into an integer
-int arrayToNum(char num[12]){
+int arrayToNum(char* num){
     int8_t sign = 1;
     int base = 10;
     int val = 0;
@@ -354,7 +384,7 @@ int arrayToNum(char num[12]){
         sign = -1;
         int i = 1;
 
-        for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= 11; i++){
+        for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= tokenSize - 1; i++){
             num[i - 1] = num[i];
         }
 
@@ -365,7 +395,7 @@ int arrayToNum(char num[12]){
         base = 16;
 
         for(int j = 0; j < 2; j++){
-            for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= 11; i++){
+            for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= tokenSize - 1; i++){
                 num[i - 1] = num[i];
             }
 
@@ -373,7 +403,7 @@ int arrayToNum(char num[12]){
         }
     }
 
-    for(int i = 11; i >= 0; i--){
+    for(int i = tokenSize - 1; i >= 0; i--){
         if(num[i] == '\0')
             continue;
 

@@ -1,7 +1,7 @@
 main:
 addiu   $sp,$sp,-16
 sw      $fp,12($sp)
-move    $fp,$sp
+addu $30,$0,$29
 sw      $0,0($fp)
 sw      $0,4($fp)
 sw      $0,4($fp)
@@ -13,13 +13,14 @@ beq     $2,$0,.L2
 nop
 
 lw      $4,4($fp)
-li      $2,1431633920
+lui $1,0x5555
+ori $2,$1,0
 ori     $2,$2,0x5556
 mult    $4,$2
 mfhi    $3
 sra     $2,$4,31
 subu    $3,$3,$2
-move    $2,$3
+addu $2,$0,$3
 sll     $2,$2,1
 addu    $2,$2,$3
 subu    $3,$4,$2
@@ -27,14 +28,15 @@ beq     $3,$0,.L3
 nop
 
 lw      $4,4($fp)
-li      $2,1717960704
+lui $1,0x6666
+ori $2,$1,0
 ori     $2,$2,0x6667
 mult    $4,$2
 mfhi    $2
 sra     $3,$2,1
 sra     $2,$4,31
 subu    $3,$3,$2
-move    $2,$3
+addu $2,$0,$3
 sll     $2,$2,2
 addu    $2,$2,$3
 subu    $3,$4,$2
@@ -54,8 +56,8 @@ j       .L5
 nop
 
 .L2:
-move    $2,$0
-move    $sp,$fp
+addu $2,$0,$0
+addu $29,$0,$30
 lw      $fp,12($sp)
 addiu   $sp,$sp,16
 jr      $31

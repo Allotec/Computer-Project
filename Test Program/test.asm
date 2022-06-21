@@ -3,6 +3,6 @@ slti $t1, $t2, 100
 label:
 j label
 l2:
-sw $t1, 100($t2)
+addiu $sp,$sp,-16
 beq $t1, $t2, l2
 mult $s2, $t5    
