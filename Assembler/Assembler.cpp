@@ -55,7 +55,7 @@ uint8_t programLength(char** array){
     }
 }
   
-//Have to add a pass through the array to find the labels and put them in a table with their values then look them up when needed
+//Returns a list of 32 bit integer machine code
 uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
     //Copy orignal array to not mess up its contents
     char** arrayT = new char*[maxSize + 1];
@@ -76,7 +76,16 @@ uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
     int i;
     uint32_t programCounter = 0x400000;
     uint32_t* instructions = new uint32_t[length + 1];
-    struct label* head = labelList(arrayT, length), *ptr;
+    length += replacePseudo(arrayT, length);
+    struct label* head = labelList(arrayT, length), *ptr = head;
+
+    for(int j = 0; j < length; j++){
+        for(int k = 0; arrayT[j][k] != 0; k++){
+            printf("%c", arrayT[j][k]);
+        }
+        printf("\n");
+    }
+    
 
     //Split up all the instructions
     for(int k = 0; k < length; k++){
@@ -84,20 +93,12 @@ uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
 
         instructions[k] = mipsInstruction(splitArray[0], splitArray[1], splitArray[2], splitArray[3], head, programCounter);
 
-        //Delete temp array
-        for(int i = 0; i < maxTokens; i++) {
-            delete [] splitArray[i];
-        }
-        delete [] splitArray;
+        delete2d(splitArray, maxTokens);
 
         programCounter += 4;
     }
 
-    //Delete temp array
-    for(int i = 0; i < maxSize + 1; i++) {
-        delete [] arrayT[i];
-    }
-    delete [] arrayT;
+    delete2d(arrayT, maxSize + 1);
 
     instructions[length] = 0;
 
@@ -113,9 +114,80 @@ uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
 }
 
 //Replacing pseudo instruction with MIPS instructions
-void replacePseudo(char** array){
+uint8_t replacePseudo(char** array, uint8_t length){
+    char** splitLine;
+    uint8_t index = 0, tokens;
+    uint8_t addLines = 0;
+    int num;
     
+    for(int i = 0; i < length + addLines; i++){
+        splitLine = parseLine(array[i]);
 
+        //case move $t0, $s0
+        if(strcmp(splitLine[0], "move") == 0){
+            sprintf(array[i], "addu %s, $0, %s", splitLine[1], splitLine[2]);
+        }
+        //case li $t0, imm
+        else if(strcmp(splitLine[0], "li") == 0){
+            num = arrayToNum(splitLine[2]);
+
+            //If the imm iss less than 16 bits then use one instruction else use two
+            if(num <= 0xFFFF){
+                sprintf(array[i], "addi %s, $0, %s", splitLine[1], splitLine[2]);
+            }
+            else{
+                shiftArray(array, i, length + addLines++);
+
+                sprintf(array[i], "lui $at, %d", (num & 0xFFFF0000));
+                sprintf(array[i + 1], "ori $t0, $at, %d", (num & 0x0000FFFF));
+            }
+        }
+        else if(strcmp(splitLine[0], "bgt") == 0){
+            shiftArray(array, i, length + addLines++);
+            sprintf(array[i], "slt $at, %s, %s", splitLine[2], splitLine[1]);
+            sprintf(array[i + 1], "bne $at, $0, %s", splitLine[3]);
+
+        }
+        else if(strcmp(splitLine[0], "bge") == 0){
+            shiftArray(array, i, length + addLines++);
+            sprintf(array[i], "slt $at, %s, %s", splitLine[1], splitLine[2]);
+            sprintf(array[i + 1], "beq $at, $0, %s", splitLine[3]);
+
+        }
+        else if(strcmp(splitLine[0], "ble") == 0){
+            shiftArray(array, i, length + addLines++);
+            sprintf(array[i], "slt $at, %s, %s", splitLine[2], splitLine[1]);
+            sprintf(array[i + 1], "beq $at, $0, %s", splitLine[3]);
+
+        }
+        else if(strcmp(splitLine[0], "blt") == 0){
+            shiftArray(array, i, length + addLines++);
+            sprintf(array[i], "slt $at, %s, %s", splitLine[1], splitLine[2]);
+            sprintf(array[i + 1], "bne $at, $0, %s", splitLine[3]);
+
+        }
+    }
+
+    return(addLines);
+}
+
+//Shifts 2d array up by the specified parameters
+void shiftArray(char** array, uint8_t endIndex, uint8_t length){
+
+    for(uint8_t i = length; i > endIndex; i--){
+        strcpy(array[i], array[i - 1]);
+    }
+
+}
+
+//Deletes 2d array
+void delete2d(char** array, uint8_t length){
+    //Delete temp array
+    for(int i = 0; i < length; i++) {
+        delete [] array[i];
+    }
+
+    delete [] array;
 }
 
 //Return a linked list of labels and values and removes thme from the array
@@ -285,7 +357,13 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
                 if(opcodeV == 0x04 || opcodeV == 0x05){//Change to relative addressing instead of absolute
                     rtV = rsV;
                     rsV = rdV;
-                    rdV = ((labelFinder(head, rt) - programCounter) / 2) & 0x0000FFFF;
+                    rdV = ((labelFinder(head, rt) - programCounter) - 4) >> 2 & 0xFFFF;
+                }
+                //For lui
+                else if(opcodeV == 0x0F){
+                    rtV = rdV;
+                    rsV = 0;
+                    rdV = arrayToNum(rs) >> 16;
                 }
                 //case opcode rd, rs, imm
                 else{
@@ -299,8 +377,7 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
                 rtV = rdV;
                 rdV = arrayToNum(rs) & 0x0000FFFF;
             }
-            
-            //Shifting
+
             rtV <<= 16;
             rsV <<= 21;
             opcodeV <<= 26;
@@ -384,18 +461,18 @@ int arrayToNum(char* num){
         sign = -1;
         int i = 1;
 
-        for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= tokenSize - 1; i++){
+        for(i = 1; i < tokenSize; i++){
             num[i - 1] = num[i];
         }
 
         num[i - 1] = 0;
     }
-    else if(num[0] == '0' && num[1] == 'x'){
+    if(num[0] == '0' && (num[1] == 'x' || num[1] == 'X')){
         int i = 1;
         base = 16;
 
         for(int j = 0; j < 2; j++){
-            for(i = 1; num[i] - '0' >= 0 && num[i] - '0' <= tokenSize - 1; i++){
+            for(i = 1; i < tokenSize; i++){
                 num[i - 1] = num[i];
             }
 
@@ -406,6 +483,13 @@ int arrayToNum(char* num){
     for(int i = tokenSize - 1; i >= 0; i--){
         if(num[i] == '\0')
             continue;
+
+        if(base == 16){
+            if((num[i] >= 'a' && num[i] <= 'f'))
+                num[i] = '9' + 1 + (num[i] - 'a');
+            else if((num[i] >= 'A' && num[i] <= 'F'))
+                num[i] = '9' + 1 + (num[i] - 'A');
+        }
 
         val += (num[i] - '0') * mathPow(base, power++);
     }

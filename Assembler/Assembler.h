@@ -81,6 +81,7 @@ uint8_t labelFind(char* array, char c);
 void deleteWhiteSpace(char** array);
 uint32_t labelFinder(struct label* head, char* array);
 char** parseLine(char* line);
+void delete2d(char** array, uint8_t length);
 struct label* labelList(char** array, uint8_t &length);
-void replacePseudo(char** array);
-
+uint8_t replacePseudo(char** array, uint8_t length);
+void shiftArray(char** array, uint8_t endIndex, uint8_t length);

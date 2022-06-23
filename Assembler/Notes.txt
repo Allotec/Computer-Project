@@ -12,26 +12,11 @@ R Type Special Cases
 
 
 Pseudo Instruction Formats and Implementation
-Branch less then (blt)
-    blt $t0, $t1, for_exit 
-
-    slt $at, $t0, $t1
-    bne $at, $zero, for_exit
-
-
-Branch less than or equal (ble)
-    ble $t0, $t1, for_exit 
-
-    slt $at, $t1, $t0
-    beq $at, $zero, for_exit
-
-
 Branch greater than (bgt)
     bgt $t0, $t1, for_exit 
     
     slt $at, $t1, $t0
     bne $at, $zero, for exit
-
 
 Branch greater than or equal (bge)
     bge $t0, $t1, for_exit 
@@ -39,11 +24,29 @@ Branch greater than or equal (bge)
     slt $at, $t0, $t1
     beq $at, $zero, for exit
 
+Branch less than or equal (ble)
+    ble $t0, $t1, for_exit 
+
+    slt $at, $t1, $t0
+    beq $at, $zero, for_exit
+
+Branch less then (blt)
+    blt $t0, $t1, for_exit 
+
+    slt $at, $t0, $t1
+    bne $at, $zero, for_exit
+
+
+
+
 Load immediate (li)
     li $t0, imm
 
-    lui $at, (imm & 0xFFFF0000)
-    ori $t0, $at, (imm & 0x0000FFFF)
+    if(imm < 0xFFFF)
+        addi $t0, $zero, imm
+    else 
+        lui $at, (imm & 0xFFFF0000)
+        ori $t0, $at, (imm & 0x0000FFFF)
 
 
 Move (move)
