@@ -58,7 +58,7 @@ uint8_t programLength(char** array){
 //Returns a list of 32 bit integer machine code
 uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
     //Copy orignal array to not mess up its contents
-    char** arrayT = new char*[maxSize + 1];
+    char** arrayT = new char*[maxSize];
     
     for(int j = 0; j < maxSize; j++){
         arrayT[j] = new char[lineSize];
@@ -79,13 +79,12 @@ uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
     length += replacePseudo(arrayT, length);
     struct label* head = labelList(arrayT, length), *ptr = head;
 
-    for(int j = 0; j < length; j++){
-        for(int k = 0; arrayT[j][k] != 0; k++){
-            printf("%c", arrayT[j][k]);
-        }
-        printf("\n");
-    }
-    
+    // for(int j = 0; j < length; j++){
+    //     for(int k = 0; arrayT[j][k] != 0; k++){
+    //         printf("%c", arrayT[j][k]);
+    //     }
+    //     printf("\n");
+    // }
 
     //Split up all the instructions
     for(int k = 0; k < length; k++){
@@ -98,12 +97,12 @@ uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
         programCounter += 4;
     }
 
-    delete2d(arrayT, maxSize + 1);
+    delete2d(arrayT, maxSize);
 
     instructions[length] = 0;
 
     //Clear the label linked list
-    while(head != NULL){
+    while(head != nullptr){
         ptr = head->next;
         delete [] head->name;
         delete head;
@@ -138,7 +137,7 @@ uint8_t replacePseudo(char** array, uint8_t length){
             else{
                 shiftArray(array, i, length + addLines++);
 
-                sprintf(array[i], "lui $at, %d", (num & 0xFFFF0000));
+                sprintf(array[i], "lui $at, %d", (num & 0xFFFF0000) >> 16);
                 sprintf(array[i + 1], "ori $t0, $at, %d", (num & 0x0000FFFF));
             }
         }
@@ -166,6 +165,8 @@ uint8_t replacePseudo(char** array, uint8_t length){
             sprintf(array[i + 1], "bne $at, $0, %s", splitLine[3]);
 
         }
+        
+        delete2d(splitLine, maxTokens);
     }
 
     return(addLines);
@@ -175,7 +176,7 @@ uint8_t replacePseudo(char** array, uint8_t length){
 void shiftArray(char** array, uint8_t endIndex, uint8_t length){
 
     for(uint8_t i = length; i > endIndex; i--){
-        strcpy(array[i], array[i - 1]);
+        strncpy(array[i], array[i - 1], lineSize);
     }
 
 }
@@ -208,6 +209,7 @@ struct label* labelList(char** array, uint8_t &length){
                 tail = head;
                 head->location = programCounter;
                 head->name = new char[lineSize];
+                tail->next = nullptr;
                 
                 for(uint8_t j = 0; j < location; j++){
                     head->name[j] = array[k][j];
@@ -218,6 +220,7 @@ struct label* labelList(char** array, uint8_t &length){
                 tail = tail->next;
                 tail->location = programCounter;
                 tail->name = new char[lineSize];
+                tail->next = nullptr;
                 
                 for(uint8_t j = 0; j < location; j++){
                     tail->name[j] = array[k][j];
@@ -254,17 +257,15 @@ char** parseLine(char* line){
     //Tokenize each expression
     while(arrayIndex < lineSize && arrayRow < maxTokens){
         //If we are at the start of a word
-        if(*(line+ arrayIndex) != ' ' && *(line+ arrayIndex) != ',' && *(line+ arrayIndex) != '('){
-            for(i = 0; *(line+ arrayIndex) != ' ' && *(line+ arrayIndex) != ',' && *(line+ arrayIndex) != ')' && *(line+ arrayIndex) != '(' && arrayIndex < lineSize; i++){
-                splitArray[arrayRow][i] = *(line+ arrayIndex);
+        if(*(line + arrayIndex) != ' ' && *(line + arrayIndex) != ',' && *(line + arrayIndex) != '('){
+            for(i = 0; *(line + arrayIndex) != ' ' && *(line + arrayIndex) != ',' && *(line + arrayIndex) != ')' && *(line + arrayIndex) != '(' && *(line + arrayIndex) != '\0' && arrayIndex < lineSize; i++){
+                splitArray[arrayRow][i] = *(line + arrayIndex);
                 arrayIndex++;
             }
 
-            //Fill the rest of the opcode index with zeros
-            if(i < 7){
-                for(int j = i; j < tokenSize; j++){
-                    splitArray[arrayRow][j] = 0;
-                }
+            
+            for(int j = i; j < tokenSize; j++){
+                splitArray[arrayRow][j] = 0;
             }
 
             arrayRow++;
@@ -335,8 +336,7 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
                 rtV = rsV;
                 rsV = rdV;
                 rdV = 0;
-                opcodeV << 26;
-                instruction = opcodeV;
+                instruction = opcodeV << 26;
             }
 
             //General Case
@@ -344,7 +344,7 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
             rtV <<= 16;
             rsV <<= 21;
 
-            instruction = rdV | rtV | rsV| functV;
+            instruction |= rdV | rtV | rsV| functV;
 
             break;
         
@@ -363,7 +363,7 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
                 else if(opcodeV == 0x0F){
                     rtV = rdV;
                     rsV = 0;
-                    rdV = arrayToNum(rs) >> 16;
+                    rdV = arrayToNum(rs);
                 }
                 //case opcode rd, rs, imm
                 else{

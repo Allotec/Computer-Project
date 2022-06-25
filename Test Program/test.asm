@@ -6,3 +6,4 @@ addiu $sp,$sp,-16
 blt $t1, $t2, l2
 l2:
 li $t0, 0xFFFFF
+lui $t0, 5
