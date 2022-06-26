@@ -79,13 +79,6 @@ uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
     length += replacePseudo(arrayT, length);
     struct label* head = labelList(arrayT, length), *ptr = head;
 
-    // for(int j = 0; j < length; j++){
-    //     for(int k = 0; arrayT[j][k] != 0; k++){
-    //         printf("%c", arrayT[j][k]);
-    //     }
-    //     printf("\n");
-    // }
-
     //Split up all the instructions
     for(int k = 0; k < length; k++){
         splitArray = parseLine(arrayT[k]);
@@ -99,7 +92,7 @@ uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
 
     delete2d(arrayT, maxSize);
 
-    instructions[length] = 0;
+    instructions[length] = 0xFFFFFFFF;
 
     //Clear the label linked list
     while(head != nullptr){
@@ -138,7 +131,7 @@ uint8_t replacePseudo(char** array, uint8_t length){
                 shiftArray(array, i, length + addLines++);
 
                 sprintf(array[i], "lui $at, %d", (num & 0xFFFF0000) >> 16);
-                sprintf(array[i + 1], "ori $t0, $at, %d", (num & 0x0000FFFF));
+                sprintf(array[i + 1], "ori %s, $at, %d", splitLine[1] ,(num & 0x0000FFFF));
             }
         }
         else if(strcmp(splitLine[0], "bgt") == 0){
@@ -313,7 +306,7 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
         case 0:            
             //Special Cases
             // SLL and SRL
-            if(functV == 0x00 || functV == 0x02){
+            if(functV == 0x00 || functV == 0x02 || functV == 0x03){
                 rtV = rsV;
                 rsV = 0;
                 shamt = arrayToNum(rt);

@@ -10,6 +10,12 @@ R Type Special Cases
     mfhi and mflo
     mul and div
 
+FR type Special Cases
+    
+
+FI type Special Cases
+    
+
 
 Pseudo Instruction Formats and Implementation
 Branch greater than (bgt)
@@ -35,8 +41,6 @@ Branch less then (blt)
 
     slt $at, $t0, $t1
     bne $at, $zero, for_exit
-
-
 
 
 Load immediate (li)

@@ -3,37 +3,89 @@
 
 #include <fstream>
 #include <string>
+#include <iomanip>
 
 int main(){
-    // std::string line;
-    // std::ifstream myfile ("C:\\Users\\champ\\OneDrive\\Personal Projects\\Computer Project\\Test Program\\mipsNoPseudo.asm");
+    std::string line;
+    std::ifstream myfile ("C:\\Users\\Matthew Champagne\\OneDrive\\Personal Projects\\Computer Project\\Test Program\\mips1.asm");
+    std::ofstream output("Output.txt");
 
-    // if (myfile.is_open())
-    // {
-    //     while ( getline (myfile,line) )
-    //     {
-    //     std::cout << line << '\n';
-    //     }
-    //     myfile.close();
-    // }
+    if (myfile.is_open()){
+        while ( getline (myfile,line) ){
+        
+        }
+        myfile.close();
+    }
+    else{
+        std::cout << "File not open\n";
+    }
 
-    char array[][20] = {
-        {"move $t0, $v0      "},
-        {"slti $t1, $t2, 100 "},
-        {"label:             "},
-        {"j label            "},
-        {"addiu $sp,$sp,-16  "},
-        {"blt $t1, $t2, l2   "},
-        {"l2:                "},
-        {"li $t0, 0xFFFFF    "},
-        {"lui $t0, 5         "},
+    char array[][lineSize] = {
+        {"main:              "},
+        {"addiu   $sp,$sp,-16"},
+        {"sw      $fp,12($sp)"},
+        {"move    $fp,$sp    "},
+        {"sw      $0,0($fp)  "},
+        {"sw      $0,4($fp)  "},
+        {"sw      $0,4($fp)  "},
+        {"addi $7, $0, 1000  "},
+        {".L5:               "},
+        {"lw      $2,4($fp)  "},
+        {"slt     $2,$2,$7   "},
+        {"beq     $2,$0,.L2  "},
+        {"nop                "},
+        {"lw      $4,4($fp)  "},
+        {"li   $2,1431633920 "},
+        {"ori  $2,$2,0x5556  "},
+        {"mult    $4,$2      "},
+        {"mfhi    $3         "},
+        {"sra     $2,$4,31   "},
+        {"subu    $3,$3,$2   "},
+        {"move    $2,$3      "},
+        {"sll     $2,$2,1    "},
+        {"addu    $2,$2,$3   "},
+        {"subu    $3,$4,$2   "},
+        {"beq     $3,$0,.L3  "},
+        {"nop                "},
+        {"lw      $4,4($fp)  "},
+        {"li   $2,1717960704 "},
+        {"ori  $2,$2,0x6667  "},
+        {"mult    $4,$2      "},
+        {"mfhi    $2         "},
+        {"sra     $3,$2,1    "},
+        {"sra     $2,$4,31   "},
+        {"subu    $3,$3,$2   "},
+        {"move    $2,$3      "},
+        {"sll     $2,$2,2    "},
+        {"addu    $2,$2,$3   "},
+        {"subu    $3,$4,$2   "},
+        {"bne     $3,$0,.L4  "},
+        {"nop                "},
+        {".L3:               "},
+        {"lw      $3,0($fp)  "},
+        {"lw      $2,4($fp)  "},
+        {"addu    $2,$3,$2   "},
+        {"sw      $2,0($fp)  "},
+        {".L4:               "},
+        {"lw      $2,4($fp)  "},
+        {"addiu   $2,$2,1    "},
+        {"sw      $2,4($fp)  "},
+        {"j       .L5        "},
+        {"nop                "},
+        {".L2:               "},
+        {"move    $2,$0      "},
+        {"move    $sp,$fp    "},
+        {"lw      $fp,12($sp)"},
+        {"addiu   $sp,$sp,16 "},
+        {"jr      $31        "},
+        {"nop                "},
         {"                   "}
     };
 
-    uint32_t* instruction = assemble(array, 20);
+    uint32_t* instruction = assemble(array, 100);
 
-    for(int i = 0; *(instruction + i) != 0; i++){
-        printf("%x\n", *(instruction + i));
+    for(int i = 0; *(instruction + i) != 0xFFFFFFFF; i++){
+        output << "0x" << std::hex << std::setw(8) << std::setfill('0') << *(instruction + i) << "\n";
     }
 
     delete[] instruction;

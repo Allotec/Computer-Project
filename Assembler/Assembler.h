@@ -16,7 +16,7 @@ struct instruction{
     uint8_t FT;
 };
 
-const uint8_t instructionNum = 60;
+const uint8_t instructionNum = 61;
 
 const instruction instructions[] = {
     //name for op fnct   fmt   ft
@@ -39,7 +39,7 @@ const instruction instructions[] = {
     {"sub.s", 3, 0x11, 0x01, 0x10, 0}, {"sub.d", 3, 0x11, 0x01, 0x11, 0}, {"lwcl", 1, 0x31, 0, 0, 0},
     {"ldcl", 1, 0x35, 0, 0, 0}, {"mfhi", 0, 0, 0x10, 0, 0}, {"mflo", 0, 0, 0x12, 0, 0},
     {"mfc0", 0, 0x10, 0, 0, 0}, {"mult", 0, 0, 0x18, 0, 0}, {"multu", 0, 0, 0x19, 0, 0},
-    {"sra", 0, 0, 0x03, 0, 0}, {"swcl", 1, 0x39, 0, 0, 0}, {"sdcl", 1, 0x3D, 0, 0, 0}
+    {"sra", 0, 0, 0x03, 0, 0}, {"swcl", 1, 0x39, 0, 0, 0}, {"sdcl", 1, 0x3D, 0, 0, 0}, {"nop", 5, 0, 0, 0, 0}
 };
 
 struct regVal{
@@ -53,16 +53,22 @@ struct label{
     struct label* next;
 };
 
-const uint8_t regNum = 33;
+const uint8_t regNum = 63;
 
 const regVal registers[] = {
-    {"$zero", 0}, {"$0", 0}, {"$at", 1}, {"$v0", 2}, {"$v1", 3},
+    {"$zero", 0}, {"$at", 1}, {"$v0", 2}, {"$v1", 3},
     {"$a0", 4}, {"$a1", 5}, {"$a2", 6}, {"$a3", 7}, {"$t0", 8},
     {"$t1", 9}, {"$t2", 10}, {"$t3", 11}, {"$t4", 12}, {"$t5", 13},
     {"$t6", 14}, {"$t7", 15}, {"$s0", 16}, {"$s1", 17}, {"$s2", 18},
     {"$s3", 19}, {"$s4", 20}, {"$s5", 21}, {"$s6", 22}, {"$s7", 23},
     {"$t8", 24}, {"$t9", 25}, {"$k0", 26}, {"$k1", 27}, {"$gp", 28},
-    {"$sp", 29}, {"$fp", 30},{"$ra", 31}
+    {"$sp", 29}, {"$fp", 30},{"$ra", 31}, {"$0", 0}, {"$1", 1},{"$2", 2},
+    {"$3", 3}, {"$4", 4}, {"$5", 5}, {"$6", 6}, {"$7", 7}, {"$8", 8}, 
+    {"$9", 9}, {"$10", 10}, {"$11", 11}, {"$12", 12}, {"$13", 13}, 
+    {"$14", 14}, {"$15", 15}, {"$16", 16}, {"$17", 17}, {"$18", 18}, 
+    {"$19", 19}, {"$20", 20}, {"$21", 21}, {"$22", 22}, {"$23", 23}, 
+    {"$24", 24}, {"$25", 26}, {"$27", 27}, {"$28", 28}, {"$29", 29}, 
+    {"$30", 30}, {"$31", 31}
 };
 
 const int lineSize = 20;
@@ -70,7 +76,7 @@ const int tokenSize = 12;
 const int maxTokens = 4;
 
 
-uint32_t* assemble(char array[][lineSize], uint8_t maxSize);
+uint32_t* assemble(char arr[][lineSize], uint8_t maxSize);
 uint8_t programLength(char** arr);
 uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct label* head, uint32_t programCounter);
 uint32_t opcodeLookup(char* opcode);
