@@ -56,18 +56,27 @@ uint8_t programLength(char** array){
 }
   
 //Returns a list of 32 bit integer machine code
-uint32_t* assemble(char arr[][lineSize], uint8_t maxSize){
+uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
     //Copy orignal array to not mess up its contents
-    char** arrayT = new char*[maxSize];
+    char** arrayT = new char*[maxSize + extraLines];
+    int k;
     
-    for(int j = 0; j < maxSize; j++){
+    for(int j = 0; j < maxSize + extraLines; j++){
         arrayT[j] = new char[lineSize];
-        for (int k = 0; k < lineSize; k++){
-            arrayT[j][k] = arr[j][k];
+
+        if(j < maxSize){
+            for (k = 0; arr[j][k] != 0; k++){
+                arrayT[j][k] = arr[j][k];
+            }
         }
+        else{
+            continue;;
+        }
+        
+        arrayT[j][k] = 0;
     }
 
-    uint8_t length = programLength(arrayT);
+    uint8_t length = maxSize;//programLength(arrayT);
     //Opcode -> 0
     //Rd -> 1
     //Rs -> 2

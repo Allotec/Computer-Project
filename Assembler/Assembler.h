@@ -76,7 +76,7 @@ const int tokenSize = 12;
 const int maxTokens = 4;
 
 
-uint32_t* assemble(char arr[][lineSize], uint8_t maxSize);
+uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines);
 uint8_t programLength(char** arr);
 uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct label* head, uint32_t programCounter);
 uint32_t opcodeLookup(char* opcode);
