@@ -1,60 +1,5 @@
 #include "Assembler.h"
 
-//Gets rid of the lines with all spaces
-void deleteWhiteSpace(char** array, uint8_t maxSize){
-    uint8_t row = 0;
-    uint8_t empty = 0;
-    uint8_t i;
-
-    while(row < maxSize){
-        for(uint8_t j = 0; j < lineSize; j++){
-            if(array[row][j] == ' '){
-                empty++;
-            }
-        }
-        
-        //If the row is blank shift everything down and blank out the last thing so there isn't two copies
-        if(empty == lineSize - 1){
-            for(i = row + 1; i < maxSize; i++){
-                for(uint8_t j = 0; j < lineSize; j++){
-                    array[i - 1][j] = array[i][j];
-                }
-            }
-
-            for(uint8_t j = 0; j < lineSize; j++){
-                    array[i][j] = ' ';
-            }
-
-        }
-        else{
-            empty = 0;
-            row++;
-        }
-    }
-
-}
-
-//Finds the first empty line
-uint8_t programLength(char** array){
-    deleteWhiteSpace(array, 9);
-    uint8_t empty = 0;
-    
-    for(int i = 0; true; i++){
-        for(int j = 0; j < lineSize; j++){
-            if(array[i][j] == ' '){
-                empty++;
-            }
-        }
-        
-        if(empty == lineSize - 1){// Add a max length if needed
-            return(i);
-        }
-        else{
-            empty = 0;
-        }
-    }
-}
-  
 //Returns a list of 32 bit integer machine code
 uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
     //Copy orignal array to not mess up its contents
@@ -76,7 +21,7 @@ uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
         arrayT[j][k] = 0;
     }
 
-    uint8_t length = maxSize;//programLength(arrayT);
+    uint8_t length = maxSize;
     //Opcode -> 0
     //Rd -> 1
     //Rs -> 2
