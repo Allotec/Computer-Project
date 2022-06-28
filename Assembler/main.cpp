@@ -7,13 +7,11 @@
 
 int main(int argc, char** argv){
     std::string line;
-    std::ifstream myfile (argv[1]);
-    std::ofstream output(argv[2]);
+    std::ifstream myfile ("C:\\Users\\Matthew Champagne\\OneDrive\\Personal Projects\\Computer Project\\TestProgram\\test.asm");
+    std::ofstream output("Output.txt");
     std::vector<std::string> arrayLines;
 
     if (myfile.is_open()){
-        std::cout << "Loaded File\n";
-
         while(!myfile.eof()){
             std::getline(myfile, line);
             arrayLines.push_back(line);
@@ -23,6 +21,7 @@ int main(int argc, char** argv){
     }
     else{
         std::cout << "File could not open\n";
+        return(0);
     }
     
     char** array = new char*[arrayLines.size()];

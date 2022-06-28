@@ -84,7 +84,7 @@ uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
     char** splitArray;
     int i;
     uint32_t programCounter = 0x400000;
-    uint32_t* instructions = new uint32_t[length + 1];
+    uint32_t* instructions = new uint32_t[length + extraLines];
     length += replacePseudo(arrayT, length);
     struct label* head = labelList(arrayT, length), *ptr = head;
 
@@ -216,6 +216,8 @@ struct label* labelList(char** array, uint8_t &length){
                 for(uint8_t j = 0; j < location; j++){
                     head->name[j] = array[k][j];
                 }
+
+                head->name[location] = 0;
             }
             else{
                 tail->next = new struct label;
@@ -227,6 +229,8 @@ struct label* labelList(char** array, uint8_t &length){
                 for(uint8_t j = 0; j < location; j++){
                     tail->name[j] = array[k][j];
                 }
+
+                tail->name[location] = 0;
             }
 
             //Shift and delete
@@ -367,10 +371,18 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
                     rsV = 0;
                     rdV = arrayToNum(rs);
                 }
-                //case opcode rd, rs, imm
                 else{
-                    rtV = rdV;
-                    rdV = arrayToNum(rt) & 0x0000FFFF;
+                    //case op rt, imm
+                    if(rsV == 0xFF){
+                        rtV = rdV;
+                        rdV = arrayToNum(rs) & 0x0000FFFF;
+                        rsV = 0;
+                    }
+                    //case opcode rd, rs, imm
+                    else{
+                        rtV = rdV;
+                        rdV = arrayToNum(rt) & 0x0000FFFF;
+                    }
                 }
             }
             //case opcode rt, imm(rs)
@@ -406,7 +418,28 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
 
         //FI type
         case 4:
+            //rt -> ft, rs -> fmt, and rdV -> imm
+            rdV = labelFinder(head, rd);
 
+            //case op label 
+            //assumes imm is zero
+            if(rdV != 0){
+                rtV = instructions[opcodeIndex].FT;
+                rsV = instructions[opcodeIndex].FMT;
+                rdV = ((labelFinder(head, rd) - programCounter) - 4) >> 2 & 0xFFFF;
+            }
+            //case op imm, label
+            else{
+                rtV = instructions[opcodeIndex].FT + (arrayToNum(rd) * 4); //No idea why but the specified flag is multiplied by 4
+                rsV = instructions[opcodeIndex].FMT;
+                rdV = ((labelFinder(head, rs) - programCounter) - 4) >> 2 & 0xFFFF;
+            }
+
+            rtV <<= 16;
+            rsV <<= 21;
+            opcodeV <<= 26;
+
+            instruction = rdV | rtV | rsV | opcodeV;
 
             break;
 

@@ -10,11 +10,40 @@ R Type Special Cases
     mfhi and mflo
     mul and div
 
-FR type Special Cases
+FR type Cases
+    add.s fd, fs, ft
+    add.d fd, fs, ft
+
+    sub.s fd, fs, ft
+    sub.d fd, fs, ft
+
+    mul.s fd, fs, ft
+    mul.d fd, fs, ft
+
+    div.s fd, fs, ft
+    div.d fd, fs, ft
+
     
 
-FI type Special Cases
-    
+    No imm assumes the zero flag
+    c.x.s $fs, $ft
+    c.x.d $fs, $ft
+
+    imm- is sets the specified flag valid values are 0-7
+    c.x.s imm, $fs, $ft
+    c.x.d imm, $fs, $ft
+
+
+FI type Cases
+    Without the imm it is assumed to be zero
+    bc1t label
+    bc1f label
+
+    imm- is sets the specified flag valid values are 0-7
+    bc1t imm, label
+    bc1f imm, label
+
+
 
 
 Pseudo Instruction Formats and Implementation

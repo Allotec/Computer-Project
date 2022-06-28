@@ -1,10 +1,9 @@
-move $t0, $v0
-slti $t1, $t2, 100 
-label:
-j label
-addiu $sp,$sp,-16
-blt $t1, $t2, l2
-l2:
-li $t0, 0xFFFFF
-lui $t0, 5
-nop
+main:
+bc1t 0, main
+bc1t 1, main
+bc1t 2, main
+bc1t 3, main
+bc1t 4, main
+bc1t 5, main
+bc1t 6, main
+bc1t 7, main
