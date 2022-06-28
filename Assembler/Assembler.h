@@ -39,7 +39,7 @@ const instruction instructions[] = {
     {"sub.s", 3, 0x11, 0x01, 0x10, 0}, {"sub.d", 3, 0x11, 0x01, 0x11, 0}, {"lwc1", 1, 0x31, 0, 0, 0},
     {"ldc1", 1, 0x35, 0, 0, 0}, {"mfhi", 0, 0, 0x10, 0, 0}, {"mflo", 0, 0, 0x12, 0, 0},
     {"mfc0", 0, 0x10, 0, 0, 0}, {"mult", 0, 0, 0x18, 0, 0}, {"multu", 0, 0, 0x19, 0, 0},
-    {"sra", 0, 0, 0x03, 0, 0}, {"swcl", 1, 0x39, 0, 0, 0}, {"sdcl", 1, 0x3D, 0, 0, 0}, {"nop", 5, 0, 0, 0, 0}
+    {"sra", 0, 0, 0x03, 0, 0}, {"swc1", 1, 0x39, 0, 0, 0}, {"sdc1", 1, 0x3D, 0, 0, 0}, {"nop", 5, 0, 0, 0, 0}
 };
 
 const uint8_t instructionNum = sizeof(instructions) / sizeof(instructions[0]);

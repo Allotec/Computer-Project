@@ -10,7 +10,7 @@ for i in range(len(lines2)):
     lines2[i] = lines2[i].strip()
 
     if(lines1[i] != lines2[i]):
-        print("Line- " + str(i + 2) + " Output- " + lines1[i] + " Actual- " + lines2[i])
+        print("Line- " + str(i + 1) + " Output- " + lines1[i] + " Actual- " + lines2[i])
         flag = 1
 
 if flag == 0:
