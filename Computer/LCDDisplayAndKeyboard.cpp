@@ -61,7 +61,7 @@ char menuOption(){
   }
 }
 
-void printArray(int row1, int row2, char array[][COLUMNS]){
+void printArray(int row1, int row2, const char array[][COLUMNS]){
   int row = 0;
   lcd.clear();
 

@@ -1,4 +1,4 @@
-#include "Assembler.h"
+#include "../Disassembler/Assembler.h"
 
 //Returns a list of 32 bit integer machine code
 uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
@@ -15,7 +15,7 @@ uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
             }
         }
         else{
-            continue;;
+            continue;
         }
         
         arrayT[j][k] = 0;
@@ -151,7 +151,7 @@ struct label* labelList(char** array, uint8_t &length){
 
         if(location != 255){
             //Store in linked list
-            if(head == NULL){
+            if(head == NULL){//If null create head
                 head = new struct label;
                 tail = head;
                 head->location = programCounter;
@@ -164,7 +164,7 @@ struct label* labelList(char** array, uint8_t &length){
 
                 head->name[location] = 0;
             }
-            else{
+            else{//else create the tail
                 tail->next = new struct label;
                 tail = tail->next;
                 tail->location = programCounter;
@@ -361,12 +361,12 @@ uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct labe
             //case for c.x.s or c.x.d
             if(functV == 0x32 || functV == 0x3c || functV == 0x3e){
                 if(rdV == 0xFF){
-                    rdV = rsV;
-                    rsV = arrayToNum(rd) * 4;
+                    rdV = arrayToNum(rd) * 4;
                 }
                 else{
                     rtV = rsV;
-                    rsV = 0;
+                    rsV = rdV;
+                    rdV = 0;
                 }
             }
 

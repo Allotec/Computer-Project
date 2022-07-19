@@ -1,18 +1,9 @@
-lwc1 $f1, -100($t2)
-lwc1 $f1, ($t2)
-lwc1 $f1, -100
-swc1 $f1, -100($t2)
-swc1 $f1, ($t2)
-swc1 $f1, -100
-ldc1 $f1, -100($t2)
-ldc1 $f1, ($t2)
-ldc1 $f1, -100
-sdc1 $f1, -100($t2)
-sdc1 $f1, ($t2)
-sdc1 $f1, -100
-lw $t1, -100($t2)
-lw $t1, ($t2)
-lw $t1, -100
-sw $t1, -100($t2)
-sw $t1, ($t2)
-sw $t1, -100
+main:
+bc1t main
+bc1t 1, main
+bc1t 2, main
+bc1t 3, main
+bc1f main
+bc1f 1, main
+bc1f 2, main
+bc1f 3, main

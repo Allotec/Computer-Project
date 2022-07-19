@@ -22,7 +22,7 @@ const int ROWS = 4;
 const int ROWSARRAY = 30;
 
 //Functions
-void printArray(int row1, int row2, char array[][COLUMNS]);
+void printArray(int row1, int row2, const char array[][COLUMNS]);
 bool menuOptionsCheck(char c);
 char menuOption();
 void editProgram(bool clearArray);

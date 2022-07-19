@@ -175,7 +175,7 @@ void Memory::writeAddress(uint16_t address, uint8_t data){
     }
 
     //Put data on the lines
-    for(int i = 0; i < dataPins; i++){
+    for(int i = 0; i < dataPinsNum; i++){
         if(data & ((uint8_t)1 << i)){
             digitalWrite(dataPins[i], HIGH);
         }

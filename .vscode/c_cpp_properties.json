@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Arduino",
-            "compilerPath": "C:\\Users\\champ\\Downloads\\arduino-nightly-windows\\arduino-nightly\\hardware\\tools\\avr\\bin\\avr-g++",
+            "compilerPath": "C:\\Users\\Matthew Champagne\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\bin\\avr-g++",
             "compilerArgs": [
                 "-std=gnu++11",
                 "-fpermissive",
@@ -15,17 +15,17 @@
             ],
             "intelliSenseMode": "gcc-x64",
             "includePath": [
-                "C:\\Users\\champ\\Downloads\\arduino-nightly-windows\\arduino-nightly\\hardware\\arduino\\avr\\cores\\arduino",
-                "C:\\Users\\champ\\Downloads\\arduino-nightly-windows\\arduino-nightly\\hardware\\arduino\\avr\\variants\\mega",
-                "C:\\Users\\champ\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C-1.1.2",
-                "C:\\Users\\champ\\Downloads\\arduino-nightly-windows\\arduino-nightly\\hardware\\arduino\\avr\\libraries\\Wire\\src",
-                "C:\\Users\\champ\\Documents\\Arduino\\libraries\\PS2Keyboard-2.4.0",
-                "c:\\users\\champ\\downloads\\arduino-nightly-windows\\arduino-nightly\\hardware\\tools\\avr\\lib\\gcc\\avr\\7.3.0\\include",
-                "c:\\users\\champ\\downloads\\arduino-nightly-windows\\arduino-nightly\\hardware\\tools\\avr\\lib\\gcc\\avr\\7.3.0\\include-fixed",
-                "c:\\users\\champ\\downloads\\arduino-nightly-windows\\arduino-nightly\\hardware\\tools\\avr\\avr\\include"
+                "C:\\Users\\Matthew Champagne\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\cores\\arduino",
+                "C:\\Users\\Matthew Champagne\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\variants\\mega",
+                "C:\\Users\\Matthew Champagne\\OneDrive - Stony Brook University\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C-1.1.2",
+                "C:\\Users\\Matthew Champagne\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\libraries\\Wire\\src",
+                "C:\\Users\\Matthew Champagne\\OneDrive - Stony Brook University\\Documents\\Arduino\\libraries\\PS2Keyboard-master",
+                "c:\\users\\matthew champagne\\appdata\\local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\lib\\gcc\\avr\\7.3.0\\include",
+                "c:\\users\\matthew champagne\\appdata\\local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\lib\\gcc\\avr\\7.3.0\\include-fixed",
+                "c:\\users\\matthew champagne\\appdata\\local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\avr\\include"
             ],
             "forcedInclude": [
-                "C:\\Users\\champ\\Downloads\\arduino-nightly-windows\\arduino-nightly\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
+                "C:\\Users\\Matthew Champagne\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.5\\cores\\arduino\\Arduino.h"
             ],
             "cStandard": "c11",
             "cppStandard": "c++11",
