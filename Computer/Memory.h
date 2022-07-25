@@ -21,7 +21,7 @@ const uint8_t chipEnable[chipEnableSize] = {37, 38, 39};
 const uint8_t outputEnable = 40;
 const uint8_t writeEnable = 41;
 
-const int size = 0x7FFF;
+const int size = 0x8000;
 
 const uint8_t StaticData = 0;
 const uint8_t DynamicData = 1;
@@ -29,20 +29,12 @@ const uint8_t Stack = 2;
 const uint8_t EEPROM0 = 3;
 const uint8_t EEPROM1 = 4;
 
-/*
-MIPS Memory Layout (32 Bit)
-Text- 0x0040 0000 to 0x1000 0000
-Static Data- 0x1000 0000 to 0x1000 8000
-Dynamic Data- 0x1000 8000 growing to 0x7FFF FFFC
-Stack- 0x7FFF FFFC to 0x1000 8000
-
-Memory Mapping (16 Bit)
-Text- Subtract 0x0040 0000 from the address and add the offset from where the program starts (In the EEPROMS). If the text goes over 1 EEPROMS space go to next.
-Static Data- Subtract base address put in SRAM 1.
-Dynamic Data- Subtract base address put in SRAM 2.
-Stack- Subtract base address put in SRAM 3 but grow upwards by turning negative numbers into positive.
-
-*/
+//Unions to be able to do bitwise operations on a float or a double
+union fDouble{
+    double num;
+    float f1;
+    uint64_t bits;
+};
 
 class Memory{
 private:
@@ -56,8 +48,9 @@ public:
     uint32_t fetchData(uint16_t address); 
     void writeData(uint16_t address, uint32_t data);
     void test();
-    //void writeProgram(uint32_t program[]);
 
     Memory(uint8_t MEMNum);
+    Memory();
     ~Memory();
 };
+

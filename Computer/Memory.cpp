@@ -1,6 +1,11 @@
 #include "Memory.h"
 
+//Memory base class
 //Constructor
+Memory::Memory(){
+    this->MEMAddr = 0;
+}
+
 Memory::Memory(uint8_t MEMNum){
     this->MEMAddr = MEMNum;
 }
@@ -214,7 +219,7 @@ uint32_t Memory::fetchData(uint16_t address){
     uint32_t data = 0;
 
     for(int i = 0; i < 4; i++){
-        data = (data << 8) | (uint32_t)readAddress(address);
+        data = (data << 8) | (uint32_t)readAddress(address + i);
     }
 
     return(data);

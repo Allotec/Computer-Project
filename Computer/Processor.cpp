@@ -1,7 +1,7 @@
 #include "Processor.h"
 #include "Assembler.h"
 
-Processor::Processor(){}
+Processor::Processor() : memUnit(3) {}
 
 Processor::~Processor(){}
 
@@ -139,10 +139,6 @@ void Processor::executeProgram(uint32_t* program){
                     case 0x05:
                         if(intRegisters[rs] != intRegisters[rt])
                             pc += 4 + imm;
-                    //lbu
-                    //lhu
-                    //ll
-                    //lw
                     //ori
                     case 0x0d:
                         intRegisters[rt] = intRegisters[rs] | ((uint32_t)imm & 0x0000FFFF);
@@ -155,10 +151,19 @@ void Processor::executeProgram(uint32_t* program){
                     case 0x0b:
                         intRegisters[rt] = (uint32_t)intRegisters[rs] < ((uint32_t)imm & 0x0000FFFF) ? 1 : 0;
                         break;
+                    
+                    //Memory Instructions
+                    
+                    //lbu
+                    //lhu
+                    //ll
+                    //lw
+
                     //sb
                     //sc
                     //sh
                     //sw
+                    
                     //lwc1
                     //ldc1
                     //swc1

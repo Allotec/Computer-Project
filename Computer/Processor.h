@@ -1,11 +1,5 @@
 #pragma once
-#include "Memory.h"
-
-union fDouble{
-    double num;
-    float f1;
-    uint64_t bits;
-};
+#include "MemoryController.h"
 
 //Class to execute program on the EEPROM
 class Processor{
@@ -16,6 +10,8 @@ private:
     uint32_t high, low, pc;
     uint32_t programCounter = 0;
     uint32_t* program = nullptr;
+    
+    MemoryController memUnit;
 
 public:
     void executeProgram(uint32_t* program);
