@@ -82,22 +82,67 @@ void MemoryController::writeAddress(uint32_t address, double data){
 
 //SRAM memory reads
 uint8_t MemoryController::readByte(uint32_t address){
+    if(address > size * sramNum)
+        return(0);
 
+    return(sram[address / size].readAddress(address - ((address / size) * size)));
 }
 
 uint16_t MemoryController::readHalfWord(uint32_t address){
+    if(address > size * sramNum || address % 2 != 0)
+        return(0);
 
+    uint16_t halfWord = 0;
+
+    halfWord = ((uint16_t)sram[address / size].readAddress(address - ((address / size) * size))) << 8;
+    halfWord |= ((uint16_t)sram[address / size].readAddress(address - ((address / size) * size) + 1)) & 0x00FF;
+
+    return(halfWord);
 }
 
 uint32_t MemoryController::readWord(uint32_t address){
+    if(address > size * sramNum || address % 4 != 0)
+        return(0);
 
+    uint32_t word = 0;
+
+    word = (((uint32_t)sram[address / size].readAddress(address - ((address / size) * size))) << 24) & 0xFF000000;
+    word |= (((uint32_t)sram[address / size].readAddress(address - ((address / size) * size) + 1)) << 16) & 0x00FF0000;
+    word |= (((uint32_t)sram[address / size].readAddress(address - ((address / size) * size) + 2)) << 8) & 0x0000FF00;
+    word |= ((uint32_t)sram[address / size].readAddress(address - ((address / size) * size) + 3)) & 0x000000FF;
+
+    return(word);
 }
 
 float MemoryController::readFloat(uint32_t address){
+    if(address > size * sramNum || address % 4 != 0)
+        return(0);
 
+    fDouble word;
+
+    word.bits = (((uint32_t)sram[address / size].readAddress(address - ((address / size) * size))) << 24) & 0xFF000000;
+    word.bits |= (((uint32_t)sram[address / size].readAddress(address - ((address / size) * size) + 1)) << 16) & 0x00FF0000;
+    word.bits |= (((uint32_t)sram[address / size].readAddress(address - ((address / size) * size) + 2)) << 8) & 0x0000FF00;
+    word.bits |= ((uint32_t)sram[address / size].readAddress(address - ((address / size) * size) + 3)) & 0x000000FF;
+
+    return(word.f1);
 }
 
 double MemoryController::readDouble(uint32_t address){
+    if(address > size * sramNum || address % 8 != 0)
+        return(0);
 
+    fDouble word;
+
+    word.bits = (((uint64_t)sram[address / size].readAddress(address - ((address / size) * size))) << 56) & 0xFF00000000000000;
+    word.bits |= (((uint64_t)sram[address / size].readAddress(address - ((address / size) * size) + 1)) << 48) & 0x00FF000000000000;
+    word.bits |= (((uint64_t)sram[address / size].readAddress(address - ((address / size) * size) + 2)) << 40) & 0x0000FF0000000000;
+    word.bits |= (((uint64_t)sram[address / size].readAddress(address - ((address / size) * size) + 3)) << 32) & 0x000000FF00000000;
+    word.bits |= (((uint64_t)sram[address / size].readAddress(address - ((address / size) * size) + 4)) << 24) & 0x00000000FF000000;
+    word.bits |= (((uint64_t)sram[address / size].readAddress(address - ((address / size) * size) + 5)) << 16) & 0x0000000000FF0000;
+    word.bits |= (((uint64_t)sram[address / size].readAddress(address - ((address / size) * size) + 6)) << 8) & 0x000000000000FF00;
+    word.bits |= (((uint64_t)sram[address / size].readAddress(address - ((address / size) * size) + 7))) & 0x00000000000000FF;
+
+    return(word.num);
 }
 
