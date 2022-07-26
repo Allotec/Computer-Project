@@ -102,7 +102,8 @@ void Processor::executeProgram(uint32_t* program){
                     case 0x12: 
                         intRegisters[rd] = low; 
                         break;
-                    //mfc0
+                    //mfc0 not implemented yet
+
                     //mult
                     case 0x18: 
                         temp = intRegisters[rs] * intRegisters[rt]; 
@@ -114,6 +115,8 @@ void Processor::executeProgram(uint32_t* program){
                         tempUnsigned = (uint32_t)intRegisters[rs] * (uint32_t)intRegisters[rt]; 
                         low = temp & 0x00000000FFFFFFFF; 
                         high = temp & 0xFFFFFFFF00000000; 
+                        break;
+                    default:
                         break;
                 }                
                 
@@ -153,21 +156,62 @@ void Processor::executeProgram(uint32_t* program){
                         break;
                     
                     //Memory Instructions
-                    
-                    //lbu
-                    //lhu
-                    //ll
-                    //lw
 
-                    //sb
-                    //sc
-                    //sh
-                    //sw
-                    
+                    //Load Instructions
+                    //lbu
+                    case 0x24:
+                        intRegisters[rt] = (intRegisters[rt] & 0xFFFFFF00) | ((uint32_t)memUnit.readByte(intRegisters[rs] + imm) & 0x000000FF);
+                        break;
+                    //lhu
+                    case 0x25:
+                        intRegisters[rt] = (intRegisters[rt] & 0xFFFF0000) | ((uint32_t)memUnit.readHalfWord(intRegisters[rs] + imm) & 0x0000FFFF);
+                        break;
+                    //lw or ll 
+                    case 0x23: case 0x30:
+                        intRegisters[rt] = memUnit.readWord(intRegisters[rs] + imm);
+                        break;
                     //lwc1
+                    case 0x31:
+                        floatRegisters[rt] = memUnit.readFloat(intRegisters[rs] + imm);
+                        break;
                     //ldc1
+                    case 0x35:
+                        d1.num = memUnit.readDouble(intRegisters[rs] + imm);
+                        floatRegisters[rt + 1] = d1.f1;
+                        d1.bits = d1.bits >> 32;
+                        floatRegisters[rt] = d1.f1;
+                        break;
+                    
+                    //Store Instructions
+                    //sb
+                    case 0x28:
+                        memUnit.writeAddress((uint32_t)(intRegisters[rs] + imm), (uint8_t)intRegisters[rt]);
+                        break;
+                    //sh
+                    case 0x29:
+                        memUnit.writeAddress((uint32_t)(intRegisters[rs] + imm), (uint16_t)intRegisters[rt]);
+                        break;
+                    //sw or sc
+                    case 0x2b: case 0x38:
+                        memUnit.writeAddress((uint32_t)(intRegisters[rs] + imm), (uint32_t)intRegisters[rt]);
+                        break;
                     //swc1
+                    case 0x39:
+                        memUnit.writeAddress((uint32_t)(intRegisters[rs] + imm), floatRegisters[rt]);
+                        break;
                     //sdc1
+                    case 0x3d:
+                        if(rt % 2 != 0)//Error doubles have to be on even numbered registers
+                            break;
+
+                        d1.f1 = floatRegisters[rt];
+                        d1.bits = d1.bits << 32;
+                        d1.f1 = floatRegisters[rt + 1];
+                        memUnit.writeAddress((uint32_t)(intRegisters[rs] + imm), d1.num);
+                        break;
+                    
+                    default:
+                    break;
                 }
 
                 break;
@@ -309,7 +353,6 @@ void Processor::executeProgram(uint32_t* program){
 
             //Error
             default:
-
 
                 break;
         }

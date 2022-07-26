@@ -1,0 +1,51 @@
+Date : 2022-07-25 19:24:26
+Directory : c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project
+Total : 19 files,  2600 codes, 334 comments, 525 blanks, all 3459 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |         16 |      2,016 |        332 |        487 |      2,835 |
+| HTML     |          1 |        576 |          2 |         35 |        613 |
+| Python   |          1 |          6 |          0 |          2 |          8 |
+| Markdown |          1 |          2 |          0 |          1 |          3 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                          | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                             |         19 |      2,600 |        334 |        525 |      3,459 |
+| Assembler                                                                                                     |          2 |        408 |         58 |        107 |        573 |
+| Computer                                                                                                      |         12 |      1,567 |        274 |        364 |      2,205 |
+| Disassembler                                                                                                  |          1 |         31 |          0 |          9 |         40 |
+| Documentation                                                                                                 |          1 |        576 |          2 |         35 |        613 |
+| TestProgram                                                                                                   |          2 |         16 |          0 |          9 |         25 |
++---------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                                      | language | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Assembler\Assembler.cpp                | C++      |        354 |         58 |         97 |        509 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Assembler\main.cpp                     | C++      |         54 |          0 |         10 |         64 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\Assembler.cpp                 | C++      |        354 |         58 |         96 |        508 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\Assembler.h                   | C++      |         96 |         14 |         15 |        125 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\Computer.ino                  | C++      |         46 |          2 |         17 |         65 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\Disassembler.cpp              | C++      |        299 |         47 |         76 |        422 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\LCDDisplayAndKeyboard.cpp     | C++      |        203 |          1 |         26 |        230 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\LCDDisplayAndKeyboard.h       | C++      |         11 |         16 |          3 |         30 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\Memory.cpp                    | C++      |        158 |         50 |         42 |        250 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\Memory.h                      | C++      |         41 |          2 |         14 |         57 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\MemoryController.cpp          | C++      |        104 |          9 |         36 |        149 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\MemoryController.h            | C++      |         20 |          2 |          5 |         27 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\Processor.cpp                 | C++      |        219 |         72 |         30 |        321 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Computer\Processor.h                   | C++      |         16 |          1 |          4 |         21 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Disassembler\main.cpp                  | C++      |         31 |          0 |          9 |         40 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\Documentation\MIPS Quick Tutorial.html | HTML     |        576 |          2 |         35 |        613 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\README.md                              | Markdown |          2 |          0 |          1 |          3 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\TestProgram\Test.cpp                   | C++      |         10 |          0 |          7 |         17 |
+| c:\Users\Matthew Champagne\OneDrive\Personal Projects\Computer Project\TestProgram\fileParse.py               | Python   |          6 |          0 |          2 |          8 |
+| Total                                                                                                         |          |      2,600 |        334 |        525 |      3,459 |
++---------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
