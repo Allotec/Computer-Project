@@ -1,5 +1,50 @@
 #include "Assembler.h"
 
+char* singleLineDis(uint32_t instruction){
+    char* line = new char[lineSize];
+    
+    uint8_t opcode, funct, fmt, ft, opcodeIndex;
+    opcode = ((instruction & bitM(6, 26)) >> 26);
+    fmt = ((instruction & bitM(5, 21)) >> 21);
+    ft = ((instruction & bitM(5, 16)) >> 16);
+    funct = (instruction & bitM(6, 0));
+
+    if(instruction == 0){
+        strcpy(line, "nop");
+        return(line);
+    }
+
+    opcodeIndex = instructionLookup(opcode, funct, fmt, ft);
+
+    switch(instructions[opcodeIndex].format){
+        //R type
+        case 0:
+            line = rTypeDis(instruction, opcodeIndex, fmt, ft);
+            break;
+        //I type
+        case 1:
+            line = iTypeDis(instruction, opcodeIndex, fmt, ft);
+            break;
+        //J type
+        case 2:
+            line = jTypeDis(instruction, opcodeIndex);
+            break;
+        //FR type
+        case 3:
+            line = frTypeDis(instruction, opcodeIndex, fmt, ft, funct);
+            break;
+        //FI yype
+        case 4:
+            line = fiTypeDis(instruction, opcodeIndex, fmt, ft);
+            break;
+        //Error
+        default:
+            break;
+    }
+
+    return(line);
+}
+
 char** disassemble(uint32_t* instructionList, uint8_t length){
     uint8_t opcode, funct, fmt, ft, labelCount = 0;
     uint8_t opcodeIndex, extra = extraLines(instructionList, length);

@@ -1,16 +1,11 @@
 #include <iostream>
 
-using namespace std;
-
 int main(){
-    uint16_t address = 23654;
+    int sum = 0;
 
-    printf("%x\n", address);
-
-    for(int i = 0; i < 2; i++){
-        printf("%d- %x ", i , (uint8_t)((address & (0xFF << (8 * i))) >> (8 * i)) ); 
+    for(int i = 0; i < 1000; i++){
+        if(i % 3 == 0 || i % 5 == 0)
+            sum += i;
     }
-
-    return(0);
 }
 

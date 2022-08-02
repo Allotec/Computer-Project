@@ -6,9 +6,13 @@
 MemoryController::MemoryController(){
     sram = new Memory[1];
     sram[0].setMemAddr(0);
+    this->sramNum = 1;
+    this->maxAddress = ((uint32_t)size * (uint32_t)(sramNum + 1) - 1);
 }
 
 MemoryController::MemoryController(uint8_t sramNum){
+    this->sramNum = sramNum;
+    this->maxAddress = ((uint32_t)size * (uint32_t)(sramNum + 1) - 1);
     sram = new Memory[sramNum];
 
     for(int i = 0; i < sramNum; i++){
@@ -21,10 +25,19 @@ MemoryController::~MemoryController(){
     delete [] sram;
 }
 
+//Getter
+uint8_t MemoryController::getSramNum(){
+    return(sramNum);
+}
+
+uint32_t MemoryController::getMaxAddress(){
+    return(maxAddress);
+}
+
 //SRAM Memory writes
 //Only have to check if its in the address space because its a byte write
 void MemoryController::writeAddress(uint32_t address, uint8_t data){
-    if(address > size * sramNum)
+    if(address > this->maxAddress)
         return;
 
     sram[address / size].writeAddress(address - ((address / size) * size), data);
@@ -32,7 +45,7 @@ void MemoryController::writeAddress(uint32_t address, uint8_t data){
 
 //have to check if its inside address space and the address is divisible by two
 void MemoryController::writeAddress(uint32_t address, uint16_t data){
-    if(address > size * sramNum || address % 2 != 0)
+    if(address > this->maxAddress || address % 2 != 0)
         return;
 
     sram[address / size].writeAddress(address - ((address / size) * size), ((data & 0xFF00) >> 8));
@@ -40,7 +53,7 @@ void MemoryController::writeAddress(uint32_t address, uint16_t data){
 }
 
 void MemoryController::writeAddress(uint32_t address, uint32_t data){
-    if(address > size * sramNum || address % 4 != 0)
+    if(address > this->maxAddress || address % 4 != 0)
         return;
 
     sram[address / size].writeAddress(address - ((address / size) * size), ((data & 0xFF000000) >> 24));
@@ -50,7 +63,7 @@ void MemoryController::writeAddress(uint32_t address, uint32_t data){
 }
 
 void MemoryController::writeAddress(uint32_t address, float data){
-    if(address > size * sramNum || address % 4 != 0)
+    if(address > this->maxAddress || address % 4 != 0)
         return;
 
     union fDouble floatData;
@@ -64,7 +77,7 @@ void MemoryController::writeAddress(uint32_t address, float data){
 
 //Stores a double in memory
 void MemoryController::writeAddress(uint32_t address, double data){
-    if(address > size * sramNum || address % 8 != 0)
+    if(address > this->maxAddress || address % 8 != 0)
         return;
 
     union fDouble floatData;
@@ -82,14 +95,18 @@ void MemoryController::writeAddress(uint32_t address, double data){
 
 //SRAM memory reads
 uint8_t MemoryController::readByte(uint32_t address){
-    if(address > size * sramNum)
+    if(address > this->maxAddress){
+        Serial.print("Returning bc "); Serial.print(address); Serial.print(" > "); Serial.println(((uint32_t)size * (uint32_t)(sramNum + 1)));
         return(0);
+    }
+
+    Serial.print("Chip- "); Serial.print(address / size); Serial.print(", "); Serial.print("Address- "); Serial.println(address - ((address / size) * size));
 
     return(sram[address / size].readAddress(address - ((address / size) * size)));
 }
 
 uint16_t MemoryController::readHalfWord(uint32_t address){
-    if(address > size * sramNum || address % 2 != 0)
+    if(address > this->maxAddress || address % 2 != 0)
         return(0);
 
     uint16_t halfWord = 0;
@@ -101,7 +118,7 @@ uint16_t MemoryController::readHalfWord(uint32_t address){
 }
 
 uint32_t MemoryController::readWord(uint32_t address){
-    if(address > size * sramNum || address % 4 != 0)
+    if(address > this->maxAddress || address % 4 != 0)
         return(0);
 
     uint32_t word = 0;
@@ -115,7 +132,7 @@ uint32_t MemoryController::readWord(uint32_t address){
 }
 
 float MemoryController::readFloat(uint32_t address){
-    if(address > size * sramNum || address % 4 != 0)
+    if(address > this->maxAddress || address % 4 != 0)
         return(0);
 
     fDouble word;
@@ -129,7 +146,7 @@ float MemoryController::readFloat(uint32_t address){
 }
 
 double MemoryController::readDouble(uint32_t address){
-    if(address > size * sramNum || address % 8 != 0)
+    if(address > this->maxAddress || address % 8 != 0)
         return(0);
 
     fDouble word;

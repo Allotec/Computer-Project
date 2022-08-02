@@ -4,10 +4,12 @@
 //Constructor
 Memory::Memory(){
     this->MEMAddr = 0;
+    init();
 }
 
 Memory::Memory(uint8_t MEMNum){
     this->MEMAddr = MEMNum;
+    init();
 }
 
 //Destructor
@@ -56,7 +58,7 @@ uint8_t Memory::readAddress(uint16_t address){
     }
 
     //Put the output enable Low
-    digitalWrite(outputEnable, HIGH);
+    digitalWrite(outputEnable, LOW);
     
     //Put the write enable high
     digitalWrite(writeEnable, HIGH);
@@ -97,7 +99,7 @@ uint8_t Memory::readAddress(uint16_t address){
         data |= ((uint8_t)digitalRead(dataPins[i])) << i;
     }
 
-    //Put the output enable Low
+    //Put the output enable High
     digitalWrite(outputEnable, HIGH);
 
     //Dummy Chip
@@ -238,11 +240,11 @@ void Memory::test(){
     Serial.print("Memory- ");
     Serial.println(MEMAddr);
 
-    for(int i = 1; i < 16; i++){
-        writeAddress(2 * i, 3 * i);
+    for(int i = 0; i < 15; i++){
+        writeAddress(i, 2 * i);
         data = readAddress(2 * i);
         Serial.print("Wrote- ");
-        Serial.print(3 * i);
+        Serial.print(2 * i);
         Serial.print(" Read- ");
         Serial.println(data);
     }

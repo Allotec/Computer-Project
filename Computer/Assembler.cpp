@@ -32,12 +32,18 @@ uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
     uint32_t* instructions = new uint32_t[length + extraLines];
     length += replacePseudo(arrayT, length);
     struct label* head = labelList(arrayT, length), *ptr = head;
+    uint8_t skipped = 0;
 
     //Split up all the instructions
     for(int k = 0; k < length; k++){
+        if(empty(arrayT[k])){
+            skipped++;
+            continue;
+        }
+
         splitArray = parseLine(arrayT[k]);
 
-        instructions[k] = mipsInstruction(splitArray[0], splitArray[1], splitArray[2], splitArray[3], head, programCounter);
+        instructions[k - skipped] = mipsInstruction(splitArray[0], splitArray[1], splitArray[2], splitArray[3], head, programCounter);
 
         delete2d(splitArray, maxTokens);
 
@@ -46,7 +52,7 @@ uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
 
     delete2d(arrayT, maxSize);
 
-    instructions[length] = 0xFFFFFFFF;
+    instructions[length - skipped] = 0xFFFFFFFF;
 
     //Clear the label linked list
     while(head != nullptr){
@@ -57,6 +63,17 @@ uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines){
     }
 
     return(instructions);
+}
+
+bool empty(char* line){
+    uint8_t count = 0;
+
+    for(int i = 0; i < lineSize; i++){
+        if(line[i] == ' ')
+            count++;
+    }
+
+    return(count == lineSize - 1);
 }
 
 //Replacing pseudo instruction with MIPS instructions
@@ -449,10 +466,10 @@ uint32_t regLookup(char* reg){
 }
 
 //Turns a char array into an integer
-int arrayToNum(char* num){
+int64_t arrayToNum(char* num){
     int8_t sign = 1;
     int base = 10;
-    int val = 0;
+    int64_t val = 0;
     uint8_t power = 0;
     
     //Determines if the number is negative and shifts everything down if it is
@@ -490,16 +507,16 @@ int arrayToNum(char* num){
                 num[i] = '9' + 1 + (num[i] - 'A');
         }
 
-        val += (num[i] - '0') * mathPow(base, power++);
+        val += int64_t(num[i] - '0') * mathPow(base, power++);
     }
 
     return(val * sign);
 }
 
-int mathPow(int x, uint8_t y){
-    int pow = 1;
+int64_t mathPow(int x, uint8_t y){
+    int64_t pow = 1;
 
-    for(uint8_t i = 0; i < y; i++){
+    for(uint32_t i = 0; i < y; i++){
         pow *= x;
     }
 

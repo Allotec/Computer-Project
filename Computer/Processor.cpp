@@ -3,9 +3,41 @@
 
 Processor::Processor() : memUnit(3) {}
 
-Processor::~Processor(){}
+Processor::~Processor() {}
 
-void Processor::executeProgram(uint32_t* program){
+void Processor::singleStep(uint32_t instruction, uint32_t pc, bool &single){
+    char* line = singleLineDis(instruction);
+    char c;
+
+    while(1){
+        printLine(line, pc);
+        c = getKeyboardChar();
+        switch(c){
+            case 'o':
+                showOutput(intRegisters, floatRegisters, conditionalFlags, high, low);
+                break;
+            case 'm':
+                showMemory(memUnit);
+                break;
+            case 's':
+                delete [] line;
+                return;
+            case 'r':
+                single = false;
+                delete [] line;
+                return;
+            default:
+                continue;
+        }
+    }
+
+    return;
+}
+
+//Executes the Program
+void Processor::executeProgram(uint32_t* program, bool single){
+    this->program = program;
+
     //Reset all the values to zero inside the cpu
     for(int i = 0; i < 32; i++){
         intRegisters[i] = 0;
@@ -20,8 +52,12 @@ void Processor::executeProgram(uint32_t* program){
     pc = 0;
 
     uint8_t opcode, fmt, ft, funct, opcodeIndex;
+    char* instructionPointer;
 
     while(program[pc] != 0xFFFFFFFF){
+        if(single)
+            singleStep(program[pc], pc, single);
+
         opcode = ((program[pc] & bitM(6, 26)) >> 26);
         fmt = ((program[pc] & bitM(5, 21)) >> 21);
         ft = ((program[pc] & bitM(5, 16)) >> 16);
@@ -29,8 +65,10 @@ void Processor::executeProgram(uint32_t* program){
 
         opcodeIndex = instructionLookup(opcode, funct, fmt, ft);
 
-        if(program[pc] == 0)
+        if(program[pc] == 0){
+            pc++;
             continue;
+        }
 
         uint8_t rs = fmt, rt = ft, rd = ((program[pc] & bitM(5, 11)) >> 11), shamt = ((program[pc] & bitM(5, 6)) >> 6);
         int64_t temp;
@@ -106,15 +144,15 @@ void Processor::executeProgram(uint32_t* program){
 
                     //mult
                     case 0x18: 
-                        temp = intRegisters[rs] * intRegisters[rt]; 
+                        temp = (int64_t)intRegisters[rs] * (int64_t)intRegisters[rt]; 
                         low = temp & 0x00000000FFFFFFFF; 
-                        high = temp & 0xFFFFFFFF00000000; 
+                        high = (temp & 0xFFFFFFFF00000000) >> 32; 
                         break;
                     //multu
                     case 0x19: 
-                        tempUnsigned = (uint32_t)intRegisters[rs] * (uint32_t)intRegisters[rt]; 
-                        low = temp & 0x00000000FFFFFFFF; 
-                        high = temp & 0xFFFFFFFF00000000; 
+                        tempUnsigned = (uint64_t)intRegisters[rs] * (uint64_t)intRegisters[rt]; 
+                        low = tempUnsigned & 0x00000000FFFFFFFF; 
+                        high = (tempUnsigned & 0xFFFFFFFF00000000) >> 32; 
                         break;
                     default:
                         break;
@@ -129,6 +167,7 @@ void Processor::executeProgram(uint32_t* program){
                     //addi and addiu
                     case 0x08: case 0x09:
                         intRegisters[rt] = intRegisters[rs] + imm;
+
                         break;
                     //andi
                     case 0x0c:
@@ -136,12 +175,20 @@ void Processor::executeProgram(uint32_t* program){
                         break;
                     //beq
                     case 0x04:
-                        if(intRegisters[rs] == intRegisters[rt])
-                            pc += 4 + imm;
+                        if(intRegisters[rs] == intRegisters[rt]){
+                            pc += 1 + imm;
+                            continue;
+                        }
+
+                        break;
                     //bne
                     case 0x05:
-                        if(intRegisters[rs] != intRegisters[rt])
-                            pc += 4 + imm;
+                        if(intRegisters[rs] != intRegisters[rt]){
+                            pc += 1 + imm;
+                            continue;
+                        }
+
+                        break;
                     //ori
                     case 0x0d:
                         intRegisters[rt] = intRegisters[rs] | ((uint32_t)imm & 0x0000FFFF);
@@ -155,6 +202,11 @@ void Processor::executeProgram(uint32_t* program){
                         intRegisters[rt] = (uint32_t)intRegisters[rs] < ((uint32_t)imm & 0x0000FFFF) ? 1 : 0;
                         break;
                     
+                    //lui
+                    case 0x0F:
+                        intRegisters[rt] &= 0x0000FFFF;
+                        intRegisters[rt] |= ((uint32_t)imm) << 16;
+                        break;
                     //Memory Instructions
 
                     //Load Instructions
@@ -221,13 +273,15 @@ void Processor::executeProgram(uint32_t* program){
                 switch(opcode){
                     //j
                     case 0x02:
-                        pc = (jumpAddress - 0x400000) >> 2;
-                        break;
+                        pc = jumpAddress - 0x100000;
+                        intRegisters[0] = 0; //Zero register should always be zero
+                        continue;
                     //jal
                     case 0x03:
-                        intRegisters[31] = pc+ 8;
-                        pc = (jumpAddress - 0x400000) >> 2;;
-                        break;
+                        intRegisters[31] = pc + 8;
+                        pc = jumpAddress - 0x100000;
+                        intRegisters[0] = 0; //Zero register should always be zero
+                        continue;
                 }
 
                 break;
@@ -340,13 +394,17 @@ void Processor::executeProgram(uint32_t* program){
                 //bc1t
                 if(ft % 4 == 1){
                     if(conditionalFlags[(ft - 1) % 4]){
-                        pc = pc + 4 + imm;
+                        pc += 1 + imm;
+                        intRegisters[0] = 0; //Zero register should always be zero
+                        continue;
                     }
                 }
                 //bc1f
                 else if(ft % 4 == 0){
                     if(!conditionalFlags[ft % 4]){
-                        pc = pc + 4 + imm;
+                        pc += 1 + imm;
+                        intRegisters[0] = 0; //Zero register should always be zero
+                        continue;
                     }
                 }
                 break;
@@ -357,7 +415,9 @@ void Processor::executeProgram(uint32_t* program){
                 break;
         }
 
+        intRegisters[0] = 0; //Zero register should always be zero
         pc++;
     }
 
+    singleStep(program[pc], pc, single);
 }

@@ -21,7 +21,7 @@ const uint8_t chipEnable[chipEnableSize] = {37, 38, 39};
 const uint8_t outputEnable = 40;
 const uint8_t writeEnable = 41;
 
-const int size = 0x8000;
+const uint32_t size = 0x8000;
 
 const uint8_t StaticData = 0;
 const uint8_t DynamicData = 1;

@@ -1,10 +1,8 @@
-#include <LiquidCrystal_I2C.h>
-#include <PS2Keyboard.h>
-#include <Wire.h>
 #include "LCDDisplayAndKeyboard.h"
 #include "Processor.h"
+#include "Assembler.h"
 
-char charArray[ROWSARRAY][COLUMNS];
+char** charArray;
 int charLine[ROWSARRAY];
 
 LiquidCrystal_I2C lcd(0x27, COLUMNS, ROWS);
@@ -12,15 +10,18 @@ PS2Keyboard keyboard;
 Processor CPU;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+
+  charArray = new char*[ROWSARRAY];
 
   for(int i = 0; i < ROWSARRAY; i++){
+    charArray[i] = new char[COLUMNS];
     for(int j = 0; j < COLUMNS; j++){
       charArray[i][j] = ' ';
     }
   }
 
-  delay(500);
+  delay(50);
 
   //LCD Setup
   lcd.init();
@@ -33,9 +34,11 @@ void setup() {
 }
 
 void loop() {
+  uint32_t* instructions;
   char c = menuOption();
 
   switch(c){
+
     case 'N':
     case 'n':
       editProgram(true);
@@ -44,7 +47,9 @@ void loop() {
 
     case 'E':
     case 'e':
-      
+      instructions = assemble(charArray, ROWSARRAY, 0);
+      CPU.executeProgram(instructions, true);
+      delete [] instructions;
 
       break;
 

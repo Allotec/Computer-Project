@@ -1,5 +1,6 @@
 #pragma once
 #include "MemoryController.h"
+#include "LCDDisplayAndKeyboard.h"
 
 //Class to execute program on the EEPROM
 class Processor{
@@ -13,8 +14,10 @@ private:
     
     MemoryController memUnit;
 
+    void singleStep(uint32_t instruction, uint32_t pc, bool &single);
+
 public:
-    void executeProgram(uint32_t* program);
+    void executeProgram(uint32_t* program, bool single);
     
     Processor();
     ~Processor();

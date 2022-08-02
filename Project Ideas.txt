@@ -15,8 +15,7 @@ Arduino Computer Project
         Making it a standalone computer
 
 Things to do
-    Make sure the memory is realiable by adding checks in any form
-    Make the CPU be able to execute mips instructions from the 32 bit machine code.
+    Add the syscall interface to be able to print and input values using the MARS standard
     Once the CPU is working add debugging features like showing registers and the stack and global pointers and add single stepping while showing instructions.
     Change the menu format into a command line interface
     Make a file structure and be able to create files and execute and store them

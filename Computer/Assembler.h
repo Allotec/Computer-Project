@@ -84,23 +84,19 @@ const regVal registers[] = {
 
 const uint8_t regNum = sizeof(registers) / sizeof(registers[0]);
 
-const int lineSize = 30;
+const int lineSize = 21;
 const int tokenSize = 12;
 const int maxTokens = 4;
 
 #define bitM(num, start) ((((uint32_t)1 << num) - 1) << start)
-
-// uint32_t bitM(uint8_t num, uint8_t start){
-//     return((((1 << num) - 1) << start));
-// }
 
 //Assembler Functions
 uint32_t* assemble(char** arr, uint8_t maxSize, uint8_t extraLines);
 uint32_t mipsInstruction(char* opcode, char* rd, char* rs, char* rt, struct label* head, uint32_t programCounter);
 uint32_t opcodeLookup(char* opcode);
 uint32_t regLookup(char* reg);
-int arrayToNum(char* num);
-int mathPow(int x, uint8_t y);
+int64_t arrayToNum(char* num);
+int64_t mathPow(int x, uint8_t y);
 uint8_t labelFind(char* array, char c);
 uint32_t labelFinder(struct label* head, char* array);
 char** parseLine(char* line);
@@ -108,6 +104,7 @@ void delete2d(char** array, uint8_t length);
 struct label* labelList(char** array, uint8_t &length);
 uint8_t replacePseudo(char** array, uint8_t length);
 void shiftArray(char** array, uint8_t endIndex, uint8_t length);
+bool empty(char* line);
 
 //Dissassembler Functions
 char** disassemble(uint32_t* instructionList, uint8_t length);
@@ -123,3 +120,4 @@ void addToList(struct label* &head, char* name, uint32_t location);
 char* findNode(struct label* head, uint32_t location);
 void sortList(struct label* head);
 void addNumToLabel(char* name, uint8_t num);
+char* singleLineDis(uint32_t instruction);

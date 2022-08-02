@@ -1,9 +1,12 @@
+#pragma once
 #include "Memory.h"
+#include "Arduino.h"
 
 class MemoryController{
 private:
     uint8_t sramNum;
     Memory* sram;
+    uint32_t maxAddress;
 
 public:
     //Writing to memory
@@ -19,6 +22,9 @@ public:
     uint32_t readWord(uint32_t address);
     float readFloat(uint32_t address);
     double readDouble(uint32_t address);
+
+    uint8_t getSramNum();
+    uint32_t getMaxAddress();
 
     MemoryController();
     MemoryController(uint8_t sramNum);
